@@ -5,9 +5,9 @@
 import types
 import threading
 
-from profeta.Globals import *
-from profeta.Runtime import *
-from profeta.Exceptions import *
+from hep.Globals import *
+from hep.Runtime import *
+from hep.Exceptions import *
 from functools import reduce
 
 __all__ = [ 'Belief', 'Reactor', 'SingletonBelief', 'Goal',

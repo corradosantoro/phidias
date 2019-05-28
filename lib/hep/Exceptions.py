@@ -2,42 +2,42 @@
 #
 #
 
-class ProfetaException(Exception):
+class HEPException(Exception):
     pass
 
-class NotABeliefException(ProfetaException):
+class NotABeliefException(HEPException):
     pass
 
-class NotAProcedureException(ProfetaException):
+class NotAProcedureException(HEPException):
     pass
 
-class NotAnActionListException(ProfetaException):
+class NotAnActionListException(HEPException):
     pass
 
-class InvalidContextException(ProfetaException):
+class InvalidContextException(HEPException):
     pass
 
-class InvalidContextConditionException(ProfetaException):
+class InvalidContextConditionException(HEPException):
     pass
 
-class UnboundVariableException(ProfetaException):
+class UnboundVariableException(HEPException):
     pass
 
-class NotAGroundTermException(ProfetaException):
+class NotAGroundTermException(HEPException):
     pass
 
-class MethodNotOverriddenException(ProfetaException):
+class MethodNotOverriddenException(HEPException):
     pass
 
-class InvalidPlanException(ProfetaException):
+class InvalidPlanException(HEPException):
     pass
 
-class InvalidMethodException(ProfetaException):
+class InvalidMethodException(HEPException):
     pass
 
-class CannotSuspendACancelPlanException(ProfetaException):
+class CannotSuspendACancelPlanException(HEPException):
     pass
 
-class InvalidTagException(ProfetaException):
+class InvalidTagException(HEPException):
     pass
 

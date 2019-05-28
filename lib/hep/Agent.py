@@ -2,9 +2,9 @@
 # Agent.py
 #
 
-from profeta.Types import *
-from profeta.Main import *
-from profeta.Exceptions import *
+from hep.Types import *
+from hep.Main import *
+from hep.Exceptions import *
 
 # -------------------------------------------------
 class Agent:

@@ -10,15 +10,15 @@ import readline
 import copy
 import traceback
 
-from profeta.Globals  import *
-from profeta.Types  import *
-from profeta.Runtime  import *
-from profeta.Exceptions import *
+from hep.Globals  import *
+from hep.Types  import *
+from hep.Runtime  import *
+from hep.Exceptions import *
 
-__all__ = [ 'PROFETA' ]
+__all__ = [ 'HEP' ]
 
 # ------------------------------------------------
-class PROFETA:
+class HEP:
 
     @classmethod
     def run_agent(cls, agent = DEFAULT_AGENT):
@@ -28,7 +28,7 @@ class PROFETA:
     def run(cls, main = None, agent = DEFAULT_AGENT):
         Runtime.run_agents()
         if main is not None:
-            PROFETA.achieve(main, agent)
+            HEP.achieve(main, agent)
 
     @classmethod
     def stop_agent(cls, agent = DEFAULT_AGENT):
@@ -170,17 +170,17 @@ class SHELL:
         print ("agent a            set current agent")
         print ("kb                 prints the knowledge base")
         print ("help               shows help")
-        print ("quit               quits PROFETA")
+        print ("quit               quits HEP")
         print ("")
 
 
     def C_kb(self, args):
-        PROFETA.kb(self.__current_agent).show()
+        HEP.kb(self.__current_agent).show()
 
 
     def C_agents(self, args):
         print("\nCurrent defined agents:")
-        for a in PROFETA.agents():
+        for a in HEP.agents():
             print("\t" + a)
         print("")
 
@@ -193,7 +193,7 @@ class SHELL:
 
 
     def C_plans(self, args):
-        e = PROFETA.engine(self.__current_agent)
+        e = HEP.engine(self.__current_agent)
         pl = e.plans().list_all_plans()
         print("\nPlans of agent '" + self.__current_agent + "':\n")
         GVARS.show_variable_values = False
@@ -204,7 +204,7 @@ class SHELL:
 
 
     def C_goals(self, args):
-        e = PROFETA.engine(self.__current_agent)
+        e = HEP.engine(self.__current_agent)
         pl = e.goals().list_all_plans()
         GVARS.show_variable_values = False
         print("\nGoals of agent '" + self.__current_agent + "':\n")
@@ -215,7 +215,7 @@ class SHELL:
 
 
     def C_waiting(self, args):
-        e = PROFETA.engine(self.__current_agent)
+        e = HEP.engine(self.__current_agent)
         (_, pl) = e.waiting_plans().all()
         print("\nWaiting plans of agent " + self.__current_agent + ":\n")
         for n in pl:
@@ -226,7 +226,7 @@ class SHELL:
 
 
     def C_quit(self, args):
-        PROFETA.stop()
+        HEP.stop()
         sys.exit(0)
 
 
@@ -236,7 +236,7 @@ class SHELL:
             return
         try:
             B = eval(args[0], self.__globals)
-            PROFETA.assert_belief(B, self.__current_agent)
+            HEP.assert_belief(B, self.__current_agent)
         except:
             print ("Unexpected error in ASSERT:", sys.exc_info()[0])
             traceback.print_exc()
@@ -248,7 +248,7 @@ class SHELL:
             return
         try:
             B = eval(args[0], self.__globals)
-            PROFETA.retract_belief(B, self.__current_agent)
+            HEP.retract_belief(B, self.__current_agent)
         except:
             print ("Unexpected error in RETRACT:", sys.exc_info()[0])
             traceback.print_exc()
@@ -260,7 +260,7 @@ class SHELL:
             return
         try:
             G = eval(args[0], self.__globals)
-            PROFETA.achieve(G, self.__current_agent)
+            HEP.achieve(G, self.__current_agent)
         except NameError:
             print ("achieve: undefined goal or procedure")
         except NotAProcedureException:

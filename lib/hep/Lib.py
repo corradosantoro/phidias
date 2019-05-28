@@ -8,8 +8,8 @@ import threading
 import sys
 import time
 
-from profeta.Types  import *
-from profeta.Runtime  import *
+from hep.Types  import *
+from hep.Runtime  import *
 
 __all__ = [ 'show', 'show_line',
             'eq', 'neq', 'gt', 'geq', 'lt', 'leq',
