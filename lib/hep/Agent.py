@@ -19,16 +19,16 @@ class Agent:
         return self.__name
 
     def assert_belief(self, b):
-        PROFETA.assert_belief(b, self.__name)
+        HEP.assert_belief(b, self.__name)
 
     def retract_belief(self, b):
-        PROFETA.retract_belief(b, self.__name)
+        HEP.retract_belief(b, self.__name)
 
     def start(self):
         def_actor(self.__name)
         self.init()
         self.main()
-        PROFETA.run_agent(self.__name)
+        HEP.run_agent(self.__name)
 
     def init(self):
         pass
