@@ -130,7 +130,7 @@ class SHELL:
         readline.parse_and_bind('tab: complete')
         readline.parse_and_bind('set editing-mode vi')
         print("")
-        print("\tEPHESTUS Release 1.1.0")
+        print("\tHEPHAESTUS Release 1.1.0")
         print("\tAutonomous and Robotic Systems Laboratory")
         print("\tDepartment of Mathematics and Informatics")
         print("\tUniversity of Catania, Italy (santoro@dmi.unict.it)")
