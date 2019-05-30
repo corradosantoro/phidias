@@ -5,9 +5,9 @@
 import types
 import threading
 
-from hep.Globals import *
-from hep.Runtime import *
-from hep.Exceptions import *
+from phidias.Globals import *
+from phidias.Runtime import *
+from phidias.Exceptions import *
 from functools import reduce
 
 __all__ = [ 'Belief', 'Reactor', 'SingletonBelief', 'Goal',

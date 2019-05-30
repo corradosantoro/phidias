@@ -2,9 +2,9 @@
 # Agent.py
 #
 
-from hep.Types import *
-from hep.Main import *
-from hep.Exceptions import *
+from phidias.Types import *
+from phidias.Main import *
+from phidias.Exceptions import *
 
 # -------------------------------------------------
 class Agent:
@@ -19,16 +19,16 @@ class Agent:
         return self.__name
 
     def assert_belief(self, b):
-        HEP.assert_belief(b, self.__name)
+        PHIDIAS.assert_belief(b, self.__name)
 
     def retract_belief(self, b):
-        HEP.retract_belief(b, self.__name)
+        PHIDIAS.retract_belief(b, self.__name)
 
     def start(self):
         def_actor(self.__name)
         self.init()
         self.main()
-        HEP.run_agent(self.__name)
+        PHIDIAS.run_agent(self.__name)
 
     def init(self):
         pass

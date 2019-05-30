@@ -6,9 +6,9 @@ import types
 import threading
 import copy
 
-from hep.Types import *
-from hep.Knowledge import *
-from hep.Exceptions import *
+from phidias.Types import *
+from phidias.Knowledge import *
+from phidias.Exceptions import *
 
 DEFAULT_AGENT = "main"
 
@@ -175,7 +175,7 @@ class Intention:
         a = self.__action_list[self.__action_index]
         self.__action_index += 1
 
-        from hep.Types import Action, AddBeliefEvent, DeleteBeliefEvent, Procedure
+        from phidias.Types import Action, AddBeliefEvent, DeleteBeliefEvent, Procedure
 
         if isinstance(a, Action):
             a.do_execute(self.__context)
@@ -326,7 +326,7 @@ class Engine:
         return self.__goals
 
     def add_belief(self, uB):
-        from hep.Types import AddBeliefEvent, DATA_TYPE_REACTOR
+        from phidias.Types import AddBeliefEvent, DATA_TYPE_REACTOR
         if uB.data_type != DATA_TYPE_REACTOR:
             r = self.__kb.add_belief(uB)
         else:
@@ -337,7 +337,7 @@ class Engine:
         return r
 
     def remove_belief(self, uB):
-        from hep.Types import DeleteBeliefEvent, DATA_TYPE_REACTOR
+        from phidias.Types import DeleteBeliefEvent, DATA_TYPE_REACTOR
         if uB.data_type != DATA_TYPE_REACTOR:
             r = self.__kb.remove_belief(uB)
         else:
@@ -367,7 +367,7 @@ class Engine:
         contexts = [ uVars ]
         result = True
         #print(uContext_condition)
-        from hep.Types import Belief, ActiveBelief, Goal
+        from phidias.Types import Belief, ActiveBelief, Goal
         for t in uContext_condition.terms():
             match_result = False
             #print(t, type(t))
@@ -450,7 +450,7 @@ class Engine:
             else:
                 b = p.event().get_belief()
 
-            from hep.Types import Variable, AddBeliefEvent
+            from phidias.Types import Variable, AddBeliefEvent
             if isinstance(uEvt, AddBeliefEvent):
                 if isinstance(b.source, Variable):
                     v = b.source
@@ -549,7 +549,7 @@ class Engine:
 
     def run(self):
         self.__running = True
-        # This is the main loop of the HEP interpreter
+        # This is the main loop of the PHIDIAS interpreter
         while self.__running:
 
             evt = None
@@ -575,7 +575,7 @@ class Engine:
 
             from_waiting_plans_flag = False
 
-            from hep.Types import AddBeliefEvent, DeleteBeliefEvent, Procedure
+            from phidias.Types import AddBeliefEvent, DeleteBeliefEvent, Procedure
             if isinstance(evt, AddBeliefEvent):
                 b = evt.get_belief()
                 # ok... here we must first check if there are waiting plans
@@ -632,7 +632,7 @@ class Engine:
 
 
     def __generate_event(self, uEvt):
-        from hep.Types import AddDelBeliefEvent, AddBeliefEvent, DeleteBeliefEvent
+        from phidias.Types import AddDelBeliefEvent, AddBeliefEvent, DeleteBeliefEvent
         if isinstance(uEvt, AddBeliefEvent):
             if self.__event_queue.find_and_remove_event(AddDelBeliefEvent.DEL, uEvt.get_belief()):
                 return

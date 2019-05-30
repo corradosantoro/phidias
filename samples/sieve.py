@@ -2,9 +2,9 @@ import sys
 
 #sys.path.insert(0, "../lib")
 
-from hep.Types  import *
-from hep.Main import *
-from hep.Lib import *
+from phidias.Types  import *
+from phidias.Main import *
+from phidias.Lib import *
 
 class number(Belief): pass
 
@@ -22,9 +22,9 @@ show_all(X) / number(X) >> [ show(X,"\t"), -number(X), show_all() ]
 
 # populate the KB
 for i in range(2,100):
-    HEP.assert_belief(number(i))
+    PHIDIAS.assert_belief(number(i))
 
 # instantiate the engine
-HEP.run()
+PHIDIAS.run()
 # run the engine shell
-HEP.shell(globals())
+PHIDIAS.shell(globals())

@@ -6,9 +6,9 @@ import sys
 
 #sys.path.insert(0, "../lib")
 
-from hep.Types  import *
-from hep.Main import *
-from hep.Lib import *
+from phidias.Types  import *
+from phidias.Main import *
+from phidias.Lib import *
 
 
 class fact(Procedure): pass
@@ -23,6 +23,6 @@ fact(N, Acc) >> \
         fact(N, Acc)
     ]
 
-HEP.run()
-HEP.shell(globals())
+PHIDIAS.run()
+PHIDIAS.shell(globals())
 

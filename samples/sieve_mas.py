@@ -2,10 +2,10 @@ import sys
 
 #sys.path.insert(0, "../lib")
 
-from hep.Types  import *
-from hep.Main import *
-from hep.Lib import *
-from hep.Agent import *
+from phidias.Types  import *
+from phidias.Main import *
+from phidias.Lib import *
+from phidias.Agent import *
 
 class number(Belief): pass
 
@@ -52,4 +52,4 @@ class main(Agent):
 solver().start()
 main().start()
 # run the engine shell
-HEP.shell(globals())
+PHIDIAS.shell(globals())

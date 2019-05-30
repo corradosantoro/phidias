@@ -10,15 +10,15 @@ import readline
 import copy
 import traceback
 
-from hep.Globals  import *
-from hep.Types  import *
-from hep.Runtime  import *
-from hep.Exceptions import *
+from phidias.Globals  import *
+from phidias.Types  import *
+from phidias.Runtime  import *
+from phidias.Exceptions import *
 
-__all__ = [ 'HEP' ]
+__all__ = [ 'PHIDIAS' ]
 
 # ------------------------------------------------
-class HEP:
+class PHIDIAS:
 
     @classmethod
     def run_agent(cls, agent = DEFAULT_AGENT):
@@ -28,7 +28,7 @@ class HEP:
     def run(cls, main = None, agent = DEFAULT_AGENT):
         Runtime.run_agents()
         if main is not None:
-            HEP.achieve(main, agent)
+            PHIDIAS.achieve(main, agent)
 
     @classmethod
     def stop_agent(cls, agent = DEFAULT_AGENT):
@@ -130,7 +130,7 @@ class SHELL:
         readline.parse_and_bind('tab: complete')
         readline.parse_and_bind('set editing-mode vi')
         print("")
-        print("\tHEPHAESTUS Release 1.1.0")
+        print("\tPHIDIAS Release 1.1.0")
         print("\tAutonomous and Robotic Systems Laboratory")
         print("\tDepartment of Mathematics and Informatics")
         print("\tUniversity of Catania, Italy (santoro@dmi.unict.it)")
@@ -138,7 +138,7 @@ class SHELL:
         print("")
         while True:
             if sys.version_info[0] == 2:
-                s = raw_input("eShell: {0} > ".format(self.__current_agent)).strip()
+                s = raw_input("pShell: {0} > ".format(self.__current_agent)).strip()
             else:
                 s = input("eShell: {0} > ".format(self.__current_agent)).strip()
             if s == "":
@@ -170,17 +170,17 @@ class SHELL:
         print ("agent a            set current agent")
         print ("kb                 prints the knowledge base")
         print ("help               shows help")
-        print ("quit               quits HEP")
+        print ("quit               quits PHIDIAS")
         print ("")
 
 
     def C_kb(self, args):
-        HEP.kb(self.__current_agent).show()
+        PHIDIAS.kb(self.__current_agent).show()
 
 
     def C_agents(self, args):
         print("\nCurrent defined agents:")
-        for a in HEP.agents():
+        for a in PHIDIAS.agents():
             print("\t" + a)
         print("")
 
@@ -193,7 +193,7 @@ class SHELL:
 
 
     def C_plans(self, args):
-        e = HEP.engine(self.__current_agent)
+        e = PHIDIAS.engine(self.__current_agent)
         pl = e.plans().list_all_plans()
         print("\nPlans of agent '" + self.__current_agent + "':\n")
         GVARS.show_variable_values = False
@@ -204,7 +204,7 @@ class SHELL:
 
 
     def C_goals(self, args):
-        e = HEP.engine(self.__current_agent)
+        e = PHIDIAS.engine(self.__current_agent)
         pl = e.goals().list_all_plans()
         GVARS.show_variable_values = False
         print("\nGoals of agent '" + self.__current_agent + "':\n")
@@ -215,7 +215,7 @@ class SHELL:
 
 
     def C_waiting(self, args):
-        e = HEP.engine(self.__current_agent)
+        e = PHIDIAS.engine(self.__current_agent)
         (_, pl) = e.waiting_plans().all()
         print("\nWaiting plans of agent " + self.__current_agent + ":\n")
         for n in pl:
@@ -226,7 +226,7 @@ class SHELL:
 
 
     def C_quit(self, args):
-        HEP.stop()
+        PHIDIAS.stop()
         sys.exit(0)
 
 
@@ -236,7 +236,7 @@ class SHELL:
             return
         try:
             B = eval(args[0], self.__globals)
-            HEP.assert_belief(B, self.__current_agent)
+            PHIDIAS.assert_belief(B, self.__current_agent)
         except:
             print ("Unexpected error in ASSERT:", sys.exc_info()[0])
             traceback.print_exc()
@@ -248,7 +248,7 @@ class SHELL:
             return
         try:
             B = eval(args[0], self.__globals)
-            HEP.retract_belief(B, self.__current_agent)
+            PHIDIAS.retract_belief(B, self.__current_agent)
         except:
             print ("Unexpected error in RETRACT:", sys.exc_info()[0])
             traceback.print_exc()
@@ -260,7 +260,7 @@ class SHELL:
             return
         try:
             G = eval(args[0], self.__globals)
-            HEP.achieve(G, self.__current_agent)
+            PHIDIAS.achieve(G, self.__current_agent)
         except NameError:
             print ("achieve: undefined goal or procedure")
         except NotAProcedureException:

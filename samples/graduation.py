@@ -6,9 +6,9 @@ import sys
 
 #sys.path.insert(0, "../lib")
 
-from hep.Types import *
-from hep.Lib import *
-from hep.Main import *
+from phidias.Types import *
+from phidias.Lib import *
+from phidias.Main import *
 
 class student(Belief): pass
 
@@ -19,5 +19,5 @@ def_vars("X")
 +graduated(X) >> [ show_line(X, " is not a student"), -graduated(X) ]
 +student(X) / graduated(X) >> [ show_line(X, " is graduated and cannot be a student again"), -student(X) ]
 
-HEP.run()
-HEP.shell(globals())
+PHIDIAS.run()
+PHIDIAS.shell(globals())

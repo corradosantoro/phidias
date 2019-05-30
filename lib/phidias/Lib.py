@@ -8,8 +8,8 @@ import threading
 import sys
 import time
 
-from hep.Types  import *
-from hep.Runtime  import *
+from phidias.Types  import *
+from phidias.Runtime  import *
 
 __all__ = [ 'show', 'show_line',
             'eq', 'neq', 'gt', 'geq', 'lt', 'leq',
