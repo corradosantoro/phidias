@@ -13,7 +13,7 @@ class Knowledge(object):
         n = bel.name()
         if n in self.__kb:
             if not(bel in self.__kb[n]):
-                from profeta.Types import SingletonBelief
+                from phidias.Types import SingletonBelief
                 if isinstance(bel, SingletonBelief):
                     self.__kb[n] = [ bel ]
                 else:
