@@ -68,7 +68,9 @@ class Variable(object):
 # -----------------------------------------------
 def def_vars(*vlist):
     for v in vlist:
-        globals()['__builtins__'][v] = Variable(v)
+        var = Variable(v)
+        globals()['__builtins__'][v] = var
+        GVARS.variables[v] = var
 
 def def_actor(a):
     Runtime.agent(a)
@@ -226,6 +228,7 @@ class AddDelBeliefEvent:
     def __init__(self, uBel):
         self.__belief = uBel
         self.event_type = 0
+        self.iterate = False
 
     def __repr__(self):
         return self.sign() + repr(self.__belief)
@@ -474,7 +477,7 @@ class Procedure(AtomicFormula):
         return super(Procedure, self).name()
 
     def __getitem__(self, uTag):
-        if uTag == 'iterate':
+        if uTag == 'all':
             self.iterate = True
             return self
         else:
@@ -490,7 +493,7 @@ class Procedure(AtomicFormula):
         else:
             s = AtomicFormula.__repr__(self)
         if self.iterate:
-            s = s + "['iterate']"
+            s = s + "['all']"
         if self.__additional_event is not None:
             s = s + " / " + repr(self.__additional_event)
         return s

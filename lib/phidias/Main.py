@@ -165,6 +165,7 @@ class SHELL:
         print ("-B                 retract a belief")
         print ("G                  achieves a goal")
         print ("P                  runs a procedure")
+        print ("goals              shows goals")
         print ("plans              shows plans of current agent")
         print ("agents             shows defined agents")
         print ("agent a            set current agent")
@@ -261,10 +262,10 @@ class SHELL:
         try:
             G = eval(args[0], self.__globals)
             PHIDIAS.achieve(G, self.__current_agent)
-        except NameError:
-            print ("achieve: undefined goal or procedure")
-        except NotAProcedureException:
-            print ("achieve: undefined goal or procedure")
+        #except NameError:
+        #    print ("achieve: undefined goal or procedure")
+        #except NotAProcedureException:
+        #    print ("achieve: undefined goal or procedure")
         except :
             print ("Unexpected error in ACHIEVE:", sys.exc_info()[0])
             traceback.print_exc()
