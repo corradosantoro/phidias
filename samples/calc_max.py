@@ -15,7 +15,7 @@ class compute_max(Procedure): pass
 def_vars('X','TempMax')
 
 compute_max() / number(X) >> [ compute_max(X) ]
-compute_max(TempMax) / (number(X) & gt(X, TempMax)) >> [ compute_max(X) ]
+compute_max(TempMax) / (number(X) & gt(X,TempMax)) >> [ compute_max(X) ]
 compute_max(TempMax) >> [ show_line("The maximum is ", TempMax) ]
 
 # populate the KB
