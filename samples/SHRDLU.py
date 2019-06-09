@@ -12,8 +12,11 @@ class owned(Belief): pass
 
 class pick(Procedure): pass
 class put(Procedure): pass
+class find_bottom(Procedure): pass
+class find_tower(Procedure): pass
+class go_up(Procedure): pass
 
-def_vars('X', 'Y', 'Z')
+def_vars('X', 'Y', 'Z', 'N')
 
 pick(X) / (obj(X) & upon(Y, X)) >> [ show_line("Cannot pick ", X, " since it is under the ", Y) ]
 pick(X) / (obj(X) & upon(X, Y)) >> \
@@ -25,7 +28,7 @@ pick(X) / obj(X) >>  [
                         show_line(X, " picked"),
                         -obj(X), +owned(X)
                      ]
-pick(X) / owned(X) >> [ show("you've still got ", X) ]
+pick(X) / owned(X) >> [ show_line("you've still got ", X) ]
 pick(X) >> [ show_line("cannot pick ", X, " since it is not present") ]
 
 put(X) / owned(X) >> \
@@ -40,6 +43,14 @@ put(X, Y) / (owned(X) & obj(Y)) >> \
     [ -owned(X), +obj(X), +upon(X, Y), show_line("done") ]
 put(X, Y) >> [ show_line(X, " is not owned or does not exist") ]
 
+find_tower(X) >> [ find_bottom(X) ]
+
+find_bottom(X) / upon(X,Y) >> [ find_bottom(Y) ]
+find_bottom(X) >> [ go_up(X, 1) ]
+
+go_up(X, N) / upon(Y, X) >> [ 
+	show_line("Level ", N, ":", X), "N = N + 1", go_up(Y, N) ]
+go_up(X, N) >> [ show_line("Level ", N, ":", X) ]
 
 class ontable(Procedure): pass
 class onrobot(Procedure): pass

@@ -419,6 +419,10 @@ class Action(AtomicFormula):
         else:
             #args.insert(0, self)
             self.method(*args)
+        for t in self.terms():
+            if t.type == VARIABLE:
+                if t.name in ctx:
+                    ctx[t.name] = t.value
 
 
     def execute(self, *args):
