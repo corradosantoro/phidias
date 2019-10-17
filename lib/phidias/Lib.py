@@ -2,10 +2,10 @@
 # Lib.py
 #
 
-from __future__ import print_function
+#from __future__ import print_function
 
-import threading
 import sys
+import threading
 import time
 
 from phidias.Types  import *
@@ -71,33 +71,58 @@ class wait(Action):
         time.sleep(T() / 1000.0)
 
 # ------------------------------------------------
-class Timer(Sensor):
+if sys.implementation.name != "micropython":
+    class Timer(Sensor):
 
-    def on_start(self, uTimeout):
-        evt = threading.Event()
-        self.event = evt
-        self.timeout = uTimeout()
-        self.do_restart = False
+        def on_start(self, uTimeout):
+            evt = threading.Event()
+            self.event = evt
+            self.timeout = uTimeout()
+            self.do_restart = False
 
-    def on_restart(self, uTimeout):
-        self.do_restart = True
-        self.event.set()
+        def on_restart(self, uTimeout):
+            self.do_restart = True
+            self.event.set()
 
-    def on_stop(self):
-        self.do_restart = False
-        self.event.set()
+        def on_stop(self):
+            self.do_restart = False
+            self.event.set()
 
-    def sense(self):
-        while True:
-            self.event.wait(self.timeout / 1000.0)
-            self.event.clear()
-            if self.do_restart:
-                self.do_restart = False
-                continue
-            if self.stopped:
-                return
-            else:
-                self.assert_belief(timeout(self.__class__.__name__))
-                return
+        def sense(self):
+            while True:
+                self.event.wait(self.timeout / 1000.0)
+                self.event.clear()
+                if self.do_restart:
+                    self.do_restart = False
+                    continue
+                if self.stopped:
+                    return
+                else:
+                    self.assert_belief(timeout(self.__class__.__name__))
+                    return
 
+else:
+    class Timer(Sensor):
+
+        def on_start(self, uTimeout):
+            self.timeout = uTimeout()
+            self.do_restart = False
+
+        def on_restart(self, uTimeout):
+            self.do_restart = True
+
+        def on_stop(self):
+            self.do_restart = False
+
+        def sense(self):
+            while True:
+                time.sleep(self.timeout / 1000.0)
+                if self.do_restart:
+                    self.do_restart = False
+                    continue
+                if self.stopped:
+                    return
+                else:
+                    self.assert_belief(timeout(self.__class__.__name__))
+                    return
 

@@ -41,3 +41,6 @@ class CannotSuspendACancelPlanException(PhidiasException):
 class InvalidTagException(PhidiasException):
     pass
 
+class InvalidDestinationException(PhidiasException):
+    pass
+

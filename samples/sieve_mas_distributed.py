@@ -44,12 +44,16 @@ class solver(Agent):
 class main(Agent):
     def main(self):
         sieve() >> [ sieve(2) ]
-        sieve(X) / gt(X, 100) >> [ show_line("Generation completed, solving..."), +solve()[{'to':'solver'}] ]
-        sieve(X) >> [ +number(X)[{'to':'solver'}], "X = X + 1", sieve(X) ]
+        sieve(X) / gt(X, 100) >> [ show_line("Generation completed, solving..."), +solve()[{'to':'solver@127.0.0.1'}] ]
+        sieve(X) >> [ +number(X)[{'to':'solver@127.0.0.1'}], "X = X + 1", sieve(X) ]
 
 
-# start the actors
-solver().start()
-main().start()
+if sys.argv[1] == "--solver":
+    # start the actors
+    solver().start()
+    PHIDIAS.run_net(globals())
+elif sys.argv[1] == "--main":
+    main().start()
+    PHIDIAS.run_net(globals(),6767)
 # run the engine shell
 PHIDIAS.shell(globals())

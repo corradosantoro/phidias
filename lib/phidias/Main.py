@@ -2,12 +2,14 @@
 #
 #
 
-from __future__ import print_function
+#from __future__ import print_function
+import sys
+
+if sys.implementation.name != "micropython":
+    import readline
 
 import threading
-import sys
-import readline
-import copy
+#import copy
 import traceback
 
 from phidias.Globals  import *
@@ -15,10 +17,15 @@ from phidias.Types  import *
 from phidias.Runtime  import *
 from phidias.Exceptions import *
 
+
 __all__ = [ 'PHIDIAS' ]
 
 # ------------------------------------------------
 class PHIDIAS:
+
+    @classmethod
+    def run_net(cls, _globals, port = 6565):
+        Runtime.run_net(_globals, port)
 
     @classmethod
     def run_agent(cls, agent = DEFAULT_AGENT):
@@ -77,9 +84,10 @@ class PHIDIAS:
         elif isinstance(g, Goal):
             for (ctx,p) in Runtime.get_engine(agent).achieve_goal(g):
                 g.assign_vars_from_formula(ctx,p.event())
-                copied_g = copy.deepcopy(g)
+                #copied_g = copy.deepcopy(g)
+                copied_g = g.clone()
                 copied_g.assign(ctx)
-                print(copied_g)#, p.event())
+                print(copied_g) #, p.event())
         else:
             raise NotAProcedureException()
 
@@ -124,13 +132,14 @@ class SHELL:
                 self.__current_agent = a.__name__
 
     def run(self):
-        c = Completer([ "help", "assert", "+", "retract", "-", "agents", "agent",
-                        "plans", "kb", "waiting", "quit" ])
-        readline.set_completer(c.complete)
-        readline.parse_and_bind('tab: complete')
-        readline.parse_and_bind('set editing-mode vi')
+        if sys.implementation.name != "micropython":
+            c = Completer([ "help", "assert", "+", "retract", "-", "agents", "agent",
+                            "plans", "kb", "waiting", "quit" ])
+            readline.set_completer(c.complete)
+            readline.parse_and_bind('tab: complete')
+            readline.parse_and_bind('set editing-mode vi')
         print("")
-        print("\tPHIDIAS Release 1.1.1")
+        print("\tPHIDIAS Release 1.3.3.alpha (deepcopy-->clone,micropython,py3)")
         print("\tAutonomous and Robotic Systems Laboratory")
         print("\tDepartment of Mathematics and Informatics")
         print("\tUniversity of Catania, Italy (santoro@dmi.unict.it)")

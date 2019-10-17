@@ -2,6 +2,7 @@
 # Types.py
 #
 
+import sys
 import types
 import threading
 
@@ -32,13 +33,16 @@ class Constant(object):
         self.value = uTerm
 
     def __repr__(self):
-        return repr(self.value)
+       return repr(self.value)
 
     def __call__(self, *args):
         return self.value
 
     def bound(self):
         return True
+
+    def clone(self):
+        return Constant(self.value)
 
 
 # -----------------------------------------------
@@ -53,15 +57,27 @@ class Variable(object):
         if (self.value is None)or(not(GVARS.show_variable_values)):
             return self.name
         else:
-            return repr(self.name) + "(" + repr(self.value) + ")"
+            #return repr(self.name) + "(" + repr(self.value) + ")"
+            return repr(self.__class__.__name__) + "(" + repr(self.value) + ")"
 
     def __call__(self, *args):
         if len(args) == 1:
             self.value = args[0]
         return self.value
 
+    def __le__(self, uTerm):
+        if not(isinstance(uTerm, Procedure)) and not(isinstance(uTerm, Action)):
+            raise NotAProcedureException()
+        uTerm.assignment = self
+        return uTerm
+
     def bound(self):
         return self.value is not None
+
+    def clone(self):
+        v = Variable(self.name)
+        v.value = self.value
+        return v
 
 
 #
@@ -79,7 +95,7 @@ def def_actor(a):
 class AtomicFormula(object):
 
     def __init__(self, *args, **kwargs):
-        self.__make_terms(args)
+        self.make_terms(args)
         self.data_type = None
         self.tag = None
         self.__bindings = {}
@@ -95,19 +111,39 @@ class AtomicFormula(object):
                         ")"
         return repr_string
 
+    def clone(self):
+        t = [ ]
+        for term in self.__terms:
+            if isinstance(term, Variable):
+                t.append(term.clone())
+            elif isinstance(term, Constant):
+                t.append(term.clone())
+            else:
+                t.append(term)
+        af = self.__class__(*t)
+        af.data_type = self.data_type
+        af.tag = self.tag
+        af.__bindings = self.__bindings
+        return af
+
     def name(self):
         return self.__class__.__name__
 
     def terms(self):
         return self.__terms
 
+    def string_terms(self):
+        return [ x.value for x in self.__terms ]
+
     def bind(self, b):
         self.__bindings = b
 
-    def __make_terms(self, args):
+    def make_terms(self, args):
         self.__terms = []
         for t in args:
             if isinstance(t, Variable):
+                v = t
+            elif isinstance(t, Constant):
                 v = t
             else:
                 v = Constant(t)
@@ -308,6 +344,14 @@ class Belief(AtomicFormula):
         self.source = None
         self.source_agent = None
 
+    def clone(self):
+        bf = AtomicFormula.clone(self)
+        bf.data_type = self.data_type
+        bf.dest = self.dest
+        bf.source = self.source
+        bf.source_agent = self.source_agent
+        return bf
+
     def __repr__(self):
         s = AtomicFormula.__repr__(self)
         modifs = ""
@@ -393,7 +437,15 @@ class Action(AtomicFormula):
         self.current_agent = Runtime.currentAgent
         self.engine = Runtime.get_engine(self.current_agent)
         self.method = None
+        self.assignment = None
 
+    def clone(self):
+        ca = super(Action, self).clone()
+        ca.current_agent = self.current_agent
+        ca.engine = self.engine
+        ca.method = self.method
+        ca.assignment = self.assignment
+        return ca
 
     def __getattr__(self, uAttrName):
         self.method = getattr(self.__class__,  'on_' + uAttrName )
@@ -415,14 +467,16 @@ class Action(AtomicFormula):
                     t.value = ctx[t.name]
                 args.append(t)
         if self.method is None:
-            self.execute(*args)
+            rv = self.execute(*args)
         else:
-            #args.insert(0, self)
-            self.method(*args)
+            if sys.implementation.name == "micropython":
+                args.insert(0, self)
+            rv = self.method(*args)
         for t in self.terms():
             if t.type == VARIABLE:
                 if t.name in ctx:
                     ctx[t.name] = t.value
+        return rv
 
 
     def execute(self, *args):
@@ -466,6 +520,14 @@ class Procedure(AtomicFormula):
         super(Procedure, self).__init__(*args, **kwargs)
         self.event_type = Procedure.PROC
         self.__additional_event = None
+        self.assignment = None
+
+    def clone(self):
+        cp = super(Procedure, self).clone()
+        cp.event_type = self.event_type
+        cp.__additional_event = self.__additional_event
+        cp.assignment = self.assignment
+        return cp
 
     def additional_event(self):
         return self.__additional_event
@@ -500,6 +562,8 @@ class Procedure(AtomicFormula):
             s = s + "['all']"
         if self.__additional_event is not None:
             s = s + " / " + repr(self.__additional_event)
+        if self.assignment is not None:
+            s = self.assignment.name + " <= " + s
         return s
 
     def __rshift__(self, actionList):
@@ -549,6 +613,10 @@ class Goal(AtomicFormula):
         AtomicFormula.__init__(self, *args, **kwargs)
         self.__context_condition = None
 
+    def clone(self):
+        gl = AtomicFormula.clone(self)
+        return gl
+
     def __lshift__(self, condition):
         if isinstance(condition, ContextCondition):
             self.__context_condition = condition
@@ -566,6 +634,7 @@ class Goal(AtomicFormula):
 
 
 
+
 # -----------------------------------------------
 # BASIC SENSOR
 # This is the basic sensor class.
@@ -580,6 +649,12 @@ class Sensor(Action):
         Action.__init__(self, *args, **kwargs)
         self.thread = None
         self.stopped = False
+
+    def clone(self):
+        cs = super(Sensor, self).clone()
+        cs.thread = self.thread
+        cs.stopped = self.stopped
+        return cs
 
     def __getattr__(self, uAttrName):
         if uAttrName in Sensor.METHODS:
@@ -602,7 +677,7 @@ class Sensor(Action):
             self.engine.add_sensor(self)
             self.stopped = False
             self.on_start(*args)
-            t = threading.Thread(target = self.sense)
+            t = threading.Thread(target = self.do_sense)
             t.daemon = True
             t.start()
             self.thread = t
@@ -613,6 +688,10 @@ class Sensor(Action):
         self.stopped = True
         self.engine.del_sensor(self)
         self.on_stop(*args)
+
+    def do_sense(self):
+        self.sense()
+        self.engine.del_sensor(self)
 
     def execute(self, *args):
         pass

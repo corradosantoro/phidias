@@ -4,11 +4,12 @@
 
 import types
 import threading
-import copy
+#import copy
 
 from phidias.Types import *
 from phidias.Knowledge import *
 from phidias.Exceptions import *
+from phidias.Messaging import *
 
 DEFAULT_AGENT = "main"
 
@@ -167,39 +168,61 @@ class Intention:
         self.__action_list = uPlan.actions()
         self.__action_index = 0
         self.__action_len = len(self.__action_list)
+        self.__return_value = None
+        self.__pending_assignment = None
 
-    def execute_next(self):
+    def get_return_value(self):
+        return self.__return_value
+
+    def execute_next(self, last_ret_value):
         if self.__action_index == self.__action_len:
             return (Intention.INTENTION_END, None) # end of execution
+
+        if self.__pending_assignment is not None:
+            self.__context[self.__pending_assignment] = last_ret_value
 
         a = self.__action_list[self.__action_index]
         self.__action_index += 1
 
-        from phidias.Types import Action, AddBeliefEvent, DeleteBeliefEvent, Procedure
+        from phidias.Types import Action, AddBeliefEvent, DeleteBeliefEvent, Procedure, Variable
 
         if isinstance(a, Action):
-            a.do_execute(self.__context)
+            ret_val = a.do_execute(self.__context)
+            if a.assignment is not None:
+                self.__context[a.assignment.name] = ret_val
         elif isinstance(a, AddBeliefEvent):
             # FIXME! Check if the event queue has already a analogous "-" event
-            copied_b = copy.deepcopy(a.get_belief())
+            #copied_b = copy.deepcopy(a.get_belief())
+            copied_b = a.get_belief().clone()
             copied_b.assign(self.__context)
             if copied_b.dest is None:
                 self.__engine.add_belief(copied_b)
             else:
-                e = Runtime.get_engine(copied_b.dest)
-                copied_b.source_agent = self.__engine.agent()
-                e.add_belief(copied_b)
+                (remote_agent, a_name, site_name) = Messaging.local_or_remote(copied_b.dest)
+                if remote_agent:
+                    Messaging.send_belief(a_name, site_name, copied_b, self.__engine.agent())
+                    #print("Remote messaging to {}@{} is not supported".format(a_name,site_name))
+                else:
+                    e = Runtime.get_engine(copied_b.dest)
+                    copied_b.source_agent = self.__engine.agent()
+                    e.add_belief(copied_b)
         elif isinstance(a, DeleteBeliefEvent):
             # FIXME! Check if the event queue has already a analogous "+" event
-            copied_b = copy.deepcopy(a.get_belief())
+            #copied_b = copy.deepcopy(a.get_belief())
+            copied_b = a.get_belief().clone()
             copied_b.assign(self.__context)
             self.__engine.remove_belief(copied_b)
         elif isinstance(a, Procedure):
-            copied_a = copy.deepcopy(a)
+            if a.assignment is not None:
+                self.__pending_assignment = a.assignment.name # get variable name
+            #copied_a = copy.deepcopy(a)
+            copied_a = a.clone()
             copied_a.assign(self.__context)
             return (Intention.INTENTION_PROC, copied_a)
         elif isinstance(a, str):
             exec(a, self.__context)
+        elif isinstance(a, Variable):
+            self.__return_value = self.__context[a.name]
 
         return (Intention.INTENTION_NEXT, None)
 
@@ -278,7 +301,7 @@ class SensorCollection(object):
         else:
             return None
 
-    def del_sensor(self, name):
+    def del_sensor(self, uSensor):
         name = uSensor.__class__.__name__
         if name in self.__sensors:
             del self.__sensors[name]
@@ -417,7 +440,8 @@ class Engine:
                 new_contexts = []
                 for c in contexts:
                     #print(c, t)
-                    copied_t = copy.deepcopy(t)
+                    #copied_t = copy.deepcopy(t)
+                    copied_t = t.clone()
                     copied_t.assign_partial(c)
                     matching_plans = self.__plans_from_goal(copied_t)#, c)
                     #print(copied_t, matching_plans)
@@ -549,6 +573,7 @@ class Engine:
 
     def run(self):
         self.__running = True
+        self.__last_return_value = None
         # This is the main loop of the PHIDIAS interpreter
         while self.__running:
 
@@ -559,9 +584,13 @@ class Engine:
             # events are not processed, so first we execute intentions
             while self.__intentions != [ ]:
                 top_intention = self.__intentions[0]
-                (whats_next, evt) = top_intention.execute_next()
+                (whats_next, evt) = top_intention.execute_next(self.__last_return_value)
                 if whats_next == Intention.INTENTION_END:
                     # end of actions of intentions
+                    # retrieve return value
+                    v = top_intention.get_return_value()
+                    if v is not None:
+                        self.__last_return_value = v
                     self.__intentions.pop(0)
                 elif whats_next == Intention.INTENTION_PROC:
                     break
@@ -647,6 +676,10 @@ class Runtime:
 
     engines = { DEFAULT_AGENT : Engine(DEFAULT_AGENT) }
     currentAgent = DEFAULT_AGENT
+
+    @classmethod
+    def run_net(cls, _globals, port):
+        start_message_server(port, Runtime.engines, _globals)
 
     @classmethod
     def agent(cls, a):
