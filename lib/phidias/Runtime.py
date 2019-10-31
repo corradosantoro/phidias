@@ -198,12 +198,16 @@ class Intention:
             if copied_b.dest is None:
                 self.__engine.add_belief(copied_b)
             else:
-                (remote_agent, a_name, site_name) = Messaging.local_or_remote(copied_b.dest)
+                if isinstance(copied_b.dest, Variable):
+                    d = copied_b.dest.value
+                else:
+                    d = copied_b.dest
+                (remote_agent, a_name, site_name) = Messaging.local_or_remote(d)
                 if remote_agent:
                     Messaging.send_belief(a_name, site_name, copied_b, self.__engine.agent())
                     #print("Remote messaging to {}@{} is not supported".format(a_name,site_name))
                 else:
-                    e = Runtime.get_engine(copied_b.dest)
+                    e = Runtime.get_engine(d) #copied_b.dest)
                     copied_b.source_agent = self.__engine.agent()
                     e.add_belief(copied_b)
         elif isinstance(a, DeleteBeliefEvent):
