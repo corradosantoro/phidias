@@ -33,6 +33,7 @@ if sys.implementation.name != "micropython":
             content_length = int(self.headers['Content-Length'])
             body = self.rfile.read(content_length)
             self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
             self.end_headers()
             payload = json.loads(body.decode())
             # payload = { 'from' : source,
