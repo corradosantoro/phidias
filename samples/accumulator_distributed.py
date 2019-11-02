@@ -1,3 +1,4 @@
+import socket
 import sys
 
 from phidias.Types import *
@@ -41,15 +42,34 @@ class main(Agent):
         inc(X) >> [ show_line("Sending increment by ", X, " request..."), +request(X)[{'to': 'accumulator@127.0.0.1'}] ]
         +reply(T)[{'from': A}] >> [ show_line("New total is ", T) ]
 
+# If using the 'gateway' variant, run also
+#   phidias_gateway.py -a 127.0.0.1 -p 6700 [accumulator:6565] [main:6767]
 
-if sys.argv[1] == "--accumulator":
+if sys.argv[1] == "--accumulator-http":
     accumulator().start()
-    PHIDIAS.run_net(globals())
-elif sys.argv[1] == "--main":
+
+    PHIDIAS.run_net(globals(), 'http')
+elif sys.argv[1] == "--main-http":
     main().start()
-    PHIDIAS.run_net(globals(), 6767)
+
+    PHIDIAS.run_net(globals(), 'http', 6767)
+elif sys.argv[1] == "--accumulator-gateway":
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect(('127.0.0.1', 6700))
+
+    sock.send(b'accumulator\n')
+    accumulator().start()
+
+    PHIDIAS.run_net(globals(), 'gateway', sock)
+elif sys.argv[1] == "--main-gateway":
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect(('127.0.0.1', 6700))
+
+    sock.send(b'main\n')
+    main().start()
+
+    PHIDIAS.run_net(globals(), 'gateway', sock)
 else:
     exit("Invalid command-line")
 
-# run the engine shell
 PHIDIAS.shell(globals())

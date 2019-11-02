@@ -51,9 +51,9 @@ class main(Agent):
 if sys.argv[1] == "--solver":
     # start the actors
     solver().start()
-    PHIDIAS.run_net(globals())
+    PHIDIAS.run_net(globals(), 'http')
 elif sys.argv[1] == "--main":
     main().start()
-    PHIDIAS.run_net(globals(),6767)
+    PHIDIAS.run_net(globals(), 'http', 6767)
 # run the engine shell
 PHIDIAS.shell(globals())

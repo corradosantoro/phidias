@@ -24,8 +24,8 @@ __all__ = [ 'PHIDIAS' ]
 class PHIDIAS:
 
     @classmethod
-    def run_net(cls, _globals, port = 6565):
-        Runtime.run_net(_globals, port)
+    def run_net(cls, _globals, protocol_type, *args, **kwargs):
+        Runtime.run_net(_globals, protocol_type, *args, **kwargs)
 
     @classmethod
     def run_agent(cls, agent = DEFAULT_AGENT):

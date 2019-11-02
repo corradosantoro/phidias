@@ -682,8 +682,13 @@ class Runtime:
     currentAgent = DEFAULT_AGENT
 
     @classmethod
-    def run_net(cls, _globals, port):
-        start_message_server(port, Runtime.engines, _globals)
+    def run_net(cls, _globals, protocol_type, *args, **kwargs):
+        SUPPORTED_PROTOCOL_TYPES = {
+            'http': start_message_server_http,
+            'gateway': start_message_server_gateway }
+
+        protocol_impl = SUPPORTED_PROTOCOL_TYPES[protocol_type]
+        protocol_impl(Runtime.engines, _globals, *args, **kwargs)
 
     @classmethod
     def agent(cls, a):
