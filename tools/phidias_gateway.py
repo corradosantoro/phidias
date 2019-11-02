@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import argparse
-#import aiohttp
+import aiohttp
 import asyncio
 import collections
 import ipaddress
@@ -138,7 +138,7 @@ class EmbeddedDevice:
             response = { 'result': 'err', 'reason': str(e) }
             logging.error('Sending error reply on behalf of device {!a} over HTTP connection: {}'.format(self.device_name, response), exc_info=e)
         finally:
-            response_data = b'HTTP/1.0 200 OK\r\nServer: PHIDIAS Embedded Gateway\r\n\r\n' + json.dumps(response).encode('ascii')
+            response_data = b'HTTP/1.0 200 OK\r\nServer: PHIDIAS Embedded Gateway\r\nContent-Type: application/json\r\n\r\n' + json.dumps(response).encode('ascii')
             writer.write(response_data)
             writer.close()
 
@@ -171,9 +171,18 @@ async def dispatch_message(request_dict, sender_device):
     target_device = DEVICES_BY_PORT.get(target_key)
 
     if target_device is None:  # Not one of our embedded devices, use HTTP client method
-        logging.debug('Sending request from device {!a} to http://{}/: {}'.format(sender_device.device_name, target_key, request_dict))
+        target_url = 'http://{}/'.format(target_key)
+        logging.debug('Sending request from device {!a} to {}: {}'.format(sender_device.device_name, target_url, request_dict))
 
-        return { 'result': 'ok', 'pippo': 'pluto' }  # TODO: make HTTP request for real!
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(target_url, json=request_dict) as resp:
+                    response = await resp.json()
+                    logging.debug('HTTP response for device {!a} received from {}: {}'.format(sender_device.device_name, target_url, response))
+        except aiohttp.ClientError as e:
+            response = { 'result': 'err', 'reason': str(e) }
+            logging.error('Sending error reply to device {!a} because of HTTP error at {}: {}'.format(sender_device.device_name, target_url, response), exc_info=e)
+        return response
     else:
         request_dict['from-address'] = GATEWAY_ADDRESS
         logging.debug('Forwarding request from device {!a} to device {!a}: {}'.format(sender_device.device_name, target_device.device_name, request_dict))
@@ -195,7 +204,7 @@ async def _embedded_conn_handler(reader, writer):
 
 
 loop = asyncio.get_event_loop()
-logging.info('Starting TCP server for embedded connestions on port {}'.format(TCP_PORT))
+logging.info('Starting TCP server for embedded connections on port {}'.format(TCP_PORT))
 loop.create_task(asyncio.start_server(_embedded_conn_handler, port=TCP_PORT))
 for d in DEVICES:
     loop.create_task(d.start_http_server())
