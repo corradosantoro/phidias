@@ -270,7 +270,7 @@ class AddDelBeliefEvent:
         return self.sign() + repr(self.__belief)
 
     def __eq__(self, other):
-        return self.__belief == other.get_belief
+        return self.__belief == other.get_belief()
 
     def name(self):
         return self.sign() + self.__belief.name()

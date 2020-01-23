@@ -85,6 +85,7 @@ class EventQueue:
         for e in self.__data:
             #print("%d,%d - %s,%s" % (e.event_type, uType, repr(e.get_belief()), uBel))
             if (e.event_type == uType)and(e.get_belief() == uBel):
+                #print(type(e))
                 self.__data.remove(e)
                 self.__size -= 1
                 self.__c.release()
