@@ -469,8 +469,8 @@ class Action(AtomicFormula):
         if self.method is None:
             rv = self.execute(*args)
         else:
-            if sys.implementation.name == "micropython":
-                args.insert(0, self)
+            #if sys.implementation.name == "micropython":
+            args.insert(0, self)
             rv = self.method(*args)
         for t in self.terms():
             if t.type == VARIABLE:
@@ -664,7 +664,10 @@ class Sensor(Action):
             return getattr(self.__class__, uAttrName)
 
     def __setattr__(self, uAttrName, uValue):
-        setattr(self.__class__, uAttrName, uValue)
+        if uAttrName in ['method']:
+            self.__dict__[uAttrName] = uValue
+        else:
+            setattr(self.__class__, uAttrName, uValue)
 
     def on_sense_bind(self, *args):
         pass

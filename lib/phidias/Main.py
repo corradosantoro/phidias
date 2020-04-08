@@ -139,7 +139,7 @@ class SHELL:
             readline.parse_and_bind('tab: complete')
             readline.parse_and_bind('set editing-mode vi')
         print("")
-        print("\tPHIDIAS Release 1.3.3.alpha (deepcopy-->clone,micropython,py3)")
+        print("\tPHIDIAS Release 1.3.4.alpha (deepcopy-->clone,micropython,py3)")
         print("\tAutonomous and Robotic Systems Laboratory")
         print("\tDepartment of Mathematics and Informatics")
         print("\tUniversity of Catania, Italy (santoro@dmi.unict.it)")
