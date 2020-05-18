@@ -3,7 +3,8 @@
 PytHon Interactive Declarative Intelligent Agent System
 =======================================================
 
-1. INSTALLATION
+### 1. Installation
+
 ---------------
 Install the tool by typing (in the main dir):
 
@@ -14,8 +15,8 @@ The following packages are also needed:
   * [parse](https://pypi.org/project/parse/)
 
 
+### 2. Testing
 
-2. TESTING
 ----------
 You can enter the "sample" directory and run some tests.
 
