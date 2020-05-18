@@ -8,6 +8,10 @@ PytHon Interactive Declarative Intelligent Agent System
 Install the tool by typing (in the main dir):
 
   $ sudo python3 setup.py install
+  
+The following packages are also needed:
+  * [readline](https://pypi.org/project/gnureadline/)
+  * [parse](https://pypi.org/project/parse/)
 
 
 2. TESTING

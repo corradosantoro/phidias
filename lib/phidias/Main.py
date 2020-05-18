@@ -17,6 +17,7 @@ from phidias.Types  import *
 from phidias.Runtime  import *
 from phidias.Exceptions import *
 
+from parse import *
 
 __all__ = [ 'PHIDIAS' ]
 
@@ -158,13 +159,31 @@ class SHELL:
                 s = "retract " + s[1:]
             if s[0] == '~':
                 s = "achieve " + s[1:]
-            args = s.split()
+
+            # begin multiwords beliefs management
+            s1 = s.split('(')
+            p = None
+            if len(s1) > 1:
+                s2 = s1[1].split(')')
+                sent = s1[0] + "({})" + s2[1]
+                p = parse(sent, s)
+            else:
+                sent = s
+            # End multiwords beliefs management
+
+            args = sent.split()
+
             cmd = "C_" + args[0]
             if not(hasattr(self,cmd)):
                 self.C_achieve([s])
                 #print ("Invalid command")
                 #continue
             else:
+
+                # restoring multiwords beliefs
+                if p is not None:
+                    args[1] = args[1].replace("{}", str(p[0]))
+
                 getattr(self, cmd)(args[1:])
 
 
