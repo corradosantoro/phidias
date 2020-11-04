@@ -174,6 +174,7 @@ class SHELL:
                 # End multiwords beliefs management
             else:
                 sent = s
+                p = None
 
             args = sent.split()
 
