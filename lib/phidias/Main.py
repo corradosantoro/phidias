@@ -17,7 +17,8 @@ from phidias.Types  import *
 from phidias.Runtime  import *
 from phidias.Exceptions import *
 
-from parse import *
+if sys.implementation.name != "micropython":
+    from parse import *
 
 __all__ = [ 'PHIDIAS' ]
 
@@ -160,16 +161,19 @@ class SHELL:
             if s[0] == '~':
                 s = "achieve " + s[1:]
 
-            # begin multiwords beliefs management
-            s1 = s.split('(')
-            p = None
-            if len(s1) > 1:
-                s2 = s1[1].split(')')
-                sent = s1[0] + "({})" + s2[1]
-                p = parse(sent, s)
+            if sys.implementation.name != "micropython":
+                # begin multiwords beliefs management
+                s1 = s.split('(')
+                p = None
+                if len(s1) > 1:
+                    s2 = s1[1].split(')')
+                    sent = s1[0] + "({})" + s2[1]
+                    p = parse(sent, s)
+                else:
+                    sent = s
+                # End multiwords beliefs management
             else:
                 sent = s
-            # End multiwords beliefs management
 
             args = sent.split()
 

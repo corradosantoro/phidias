@@ -15,6 +15,7 @@ class fact(Procedure): pass
 
 def_vars("Acc", "N")
 fact(N) >> [ fact(N, 1) ]
+
 fact(1, Acc) >> [ show_line("the resulting factorial is = ", Acc) ]
 fact(N, Acc) >> \
     [
@@ -22,6 +23,12 @@ fact(N, Acc) >> \
         "N = N - 1",
         fact(N, Acc)
     ]
+#
+# --> n
+# int acc = 1;
+# for (; n != 1;n--)
+#    acc = acc * n;
+#
 
 PHIDIAS.run()
 PHIDIAS.shell(globals())
