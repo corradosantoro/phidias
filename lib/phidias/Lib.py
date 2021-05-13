@@ -11,7 +11,7 @@ import time
 from phidias.Types  import *
 from phidias.Runtime  import *
 
-__all__ = [ 'show', 'show_line',
+__all__ = [ 'show', 'show_line', 'show_fmt',
             'eq', 'neq', 'gt', 'geq', 'lt', 'leq',
             'timeout', 'Timer', 'wait' ]
 
@@ -28,6 +28,11 @@ class show_line(show):
     def execute(self, *args):
         show.execute(self, *args)
         print("")
+
+class show_fmt(Action):
+    def execute(self, *args):
+        t_a = tuple(map(lambda x:x(), args[1:]))
+        print(args[0]() % t_a, end='')
 
 # ------------------------------------------------
 # PREDICATES
@@ -80,7 +85,7 @@ if sys.implementation.name != "micropython":
             self.timeout = uTimeout()
             self.do_restart = False
 
-        def on_restart(self, uTimeout):
+        def on_restart(self):
             self.do_restart = True
             self.event.set()
 
@@ -95,7 +100,7 @@ if sys.implementation.name != "micropython":
                 if self.do_restart:
                     self.do_restart = False
                     continue
-                if self.stopped:
+                if self.stopped():
                     return
                 else:
                     self.assert_belief(timeout(self.__class__.__name__))
@@ -108,7 +113,7 @@ else:
             self.timeout = uTimeout()
             self.do_restart = False
 
-        def on_restart(self, uTimeout):
+        def on_restart(self):
             self.do_restart = True
 
         def on_stop(self):
@@ -120,7 +125,7 @@ else:
                 if self.do_restart:
                     self.do_restart = False
                     continue
-                if self.stopped:
+                if self.stopped():
                     return
                 else:
                     self.assert_belief(timeout(self.__class__.__name__))

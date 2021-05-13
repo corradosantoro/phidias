@@ -132,6 +132,9 @@ class AtomicFormula(object):
     def terms(self):
         return self.__terms
 
+    def set_terms(self, t):
+        self.__terms = t
+
     def string_terms(self):
         return [ x.value for x in self.__terms ]
 
@@ -427,7 +430,7 @@ class ActiveBelief(AtomicFormula):
 
 
     def evaluate(self, *args):
-        return False
+        raise MethodNotOverriddenException()
 
 # -----------------------------------------------
 class Action(AtomicFormula):
@@ -447,9 +450,9 @@ class Action(AtomicFormula):
         ca.assignment = self.assignment
         return ca
 
-    def __getattr__(self, uAttrName):
-        self.method = getattr(self.__class__,  'on_' + uAttrName )
-        return self
+    #def __getattr__(self, uAttrName):
+    #    self.method = getattr(self.__class__,  'on_' + uAttrName )
+    #    return self
 
     def assert_belief(self, uBel):
         self.engine.add_belief(uBel)
@@ -641,6 +644,39 @@ class Goal(AtomicFormula):
 # It has a *blocking* semantics, it is executed,
 # by the runtine, within a separate thread
 # -----------------------------------------------
+class SensorStarter(Action):
+
+    def __init__(self, uSensor):
+        Action.__init__(self)
+        self.sensor = uSensor
+        self.set_terms(uSensor.terms())
+
+    def execute(self, *args):
+        self.sensor.on_sense_start(*args)
+
+
+class SensorRestarter(Action):
+
+    def __init__(self, uSensor):
+        Action.__init__(self)
+        self.sensor = uSensor
+        self.set_terms(uSensor.terms())
+
+    def execute(self, *args):
+        self.sensor.on_restart(*args)
+
+
+class SensorStopper(Action):
+
+    def __init__(self, uSensor):
+        Action.__init__(self)
+        self.sensor = uSensor
+        self.set_terms(uSensor.terms())
+
+    def execute(self, *args):
+        self.sensor.on_sense_stop(*args)
+
+
 class Sensor(Action):
 
     METHODS = [ 'bind', 'unbind', 'start', 'stop' ]
@@ -648,26 +684,36 @@ class Sensor(Action):
     def __init__(self, *args, **kwargs):
         Action.__init__(self, *args, **kwargs)
         self.thread = None
-        self.stopped = False
+        self._stopped = False
+        #self.start = SensorStarter(*args)
+        #self.start.sensor = self
+        #self.stop = SensorStopper(*args)
+        #self.stop.sensor = self
 
     def clone(self):
         cs = super(Sensor, self).clone()
         cs.thread = self.thread
-        cs.stopped = self.stopped
+        cs._stopped = self.stopped
+        #cs.start = self.start
+        #cs.start.sensor = cs
+        #cs.stop = self.stop
+        #cs.stop.sensor = cs
         return cs
 
+    def start(self):
+        return SensorStarter(self)
+
+    def restart(self):
+        return SensorRestarter(self)
+
+    def stop(self):
+        return SensorStopper(self)
+
     def __getattr__(self, uAttrName):
-        if uAttrName in Sensor.METHODS:
-            self.method = getattr(self.__class__,  'on_sense_' + uAttrName )
-            return self
-        else:
-            return getattr(self.__class__, uAttrName)
+        return getattr(self.__class__, uAttrName)
 
     def __setattr__(self, uAttrName, uValue):
-        if uAttrName in ['method']:
-            self.__dict__[uAttrName] = uValue
-        else:
-            setattr(self.__class__, uAttrName, uValue)
+        setattr(self.__class__, uAttrName, uValue)
 
     def on_sense_bind(self, *args):
         pass
@@ -678,7 +724,7 @@ class Sensor(Action):
     def on_sense_start(self, *args):
         if self.engine.get_sensor(self) is None:
             self.engine.add_sensor(self)
-            self.stopped = False
+            self._stopped = False
             self.on_start(*args)
             t = threading.Thread(target = self.do_sense)
             t.daemon = True
@@ -688,9 +734,12 @@ class Sensor(Action):
             self.on_restart(*args)
 
     def on_sense_stop(self, *args):
-        self.stopped = True
+        self._stopped = True
         self.engine.del_sensor(self)
         self.on_stop(*args)
+
+    def stopped(self):
+        return self._stopped
 
     def do_sense(self):
         self.sense()
