@@ -16,6 +16,7 @@ class generate(Procedure): pass
 class sort(Procedure): pass
 class dump(Procedure): pass
 
+
 class RandomUniform(Action):
     def execute(self, size, x):
         x(random.uniform(0, size()))
