@@ -18,11 +18,14 @@ class result(Reactor): pass
 
 def_vars("Acc", "N", "Source", "X")
 
+# ---------------------------------------------------------------------
+# Agent 'FactComputer'
+# ---------------------------------------------------------------------
 class FactComputer(Agent):
     def main(self):
         +solve(N)[{'from': Source}] >> \
           [
-              show_line("Request to computer the factorial of ", N, " from agent ", Source),
+              show_line("Request to compute the factorial of ", N, " from agent ", Source),
               fact(N, Source)
           ]
         fact(N, Source) >> [ fact(N, 1, Source) ]

@@ -23,7 +23,12 @@ path(Src, Dest) >> \
       show_min()
   ]
 
-path(P, Total, Dest, Dest) >> [ "P.append(Dest)", show_line(P, " ", Total), +selected(P, Total) ]
+path(P, Total, Dest, Dest) >> \
+  [ 
+      "P.append(Dest)", 
+      show_line(P, " ", Total),
+      +selected(P, Total)
+  ]
 path(P, Total, Src,  Dest)['all'] / link(Src,Next,Cost) >> \
   [
       "P = P.copy()",
