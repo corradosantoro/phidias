@@ -48,7 +48,7 @@ find_tower(X) >> [ find_bottom(X) ]
 find_bottom(X) / upon(X,Y) >> [ find_bottom(Y) ]
 find_bottom(X) >> [ go_up(X, 1) ]
 
-go_up(X, N) / upon(Y, X) >> [ 
+go_up(X, N) / upon(Y, X) >> [
 	show_line("Level ", N, ":", X), "N = N + 1", go_up(Y, N) ]
 go_up(X, N) >> [ show_line("Level ", N, ":", X) ]
 
@@ -57,6 +57,7 @@ class onrobot(Procedure): pass
 
 ontable()['all'] / obj(X) >> [ show_line(X) ]
 onrobot()['all'] / owned(X) >> [ show_line(X) ]
+
 
 class free_and_pick(Procedure): pass
 class free(Procedure): pass

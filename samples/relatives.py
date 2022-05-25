@@ -16,6 +16,7 @@ class female(Belief): pass
 class sibling(Goal): pass
 class father(Goal): pass
 class mother(Goal): pass
+class check_parent(Goal): pass
 class sister(Goal): pass
 class brother(Goal): pass
 class grandpa(Goal): pass
@@ -31,6 +32,8 @@ def_vars('X','Y','P')
 sibling(X,Y) << ( parent(P,X) & parent(P,Y) & neq(X,Y) )
 father(X,Y) << ( parent(X,Y) & male(X) )
 mother(X,Y) << ( parent(X,Y) & female(X) )
+
+check_parent(X) << ( parent(Y,X) )
 
 sister(X,Y) << (sibling(X,Y) & female(X))
 brother(X,Y) << (sibling(X,Y) & male(X))

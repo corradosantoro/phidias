@@ -626,6 +626,11 @@ class Goal(AtomicFormula):
             p = Plan(self, self.__context_condition)
             Runtime.add_goal(p)
             return self
+        elif isinstance(condition, Belief):
+            self.__context_condition = ContextCondition(condition)
+            p = Plan(self, self.__context_condition)
+            Runtime.add_goal(p)
+            return self
         else:
             raise InvalidContextException()
 
