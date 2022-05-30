@@ -27,7 +27,7 @@ def_vars("X","Y")
 # ---------------------------------------------------------------------
 class solver(Agent):
     def main(self):
-        +solve()[{'from': X}] >> [ show_line("Request to solve from actor ", X), sieve() ]
+        +solve()[{'from': X}] >> [ show_line("Request to solve from agent ", X), sieve() ]
         sieve() / (number(X) & number(Y) & neq(X, Y) & (lambda: (X % Y) == 0) ) >> [ -number(X), sieve() ]
         sieve() >> [ show_line("done"), show_all() ]
 
