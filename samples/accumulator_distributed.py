@@ -60,7 +60,7 @@ elif sys.argv[1] == "--accumulator-gateway":
     #sock.send(b'accumulator\n')
     accumulator().start()
 
-    PHIDIAS.run_net(globals(), 'gateway', ('127.0.0.1', 6700), 'accumulator', 'xxx')
+    PHIDIAS.run_net(globals(), 'gateway', ('127.0.0.1', 6700), 'accumulator')
 elif sys.argv[1] == "--main-gateway":
     #sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     #sock.connect(('127.0.0.1', 6700))
