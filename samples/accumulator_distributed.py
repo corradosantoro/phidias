@@ -54,21 +54,21 @@ elif sys.argv[1] == "--main-http":
 
     PHIDIAS.run_net(globals(), 'http', 6767)
 elif sys.argv[1] == "--accumulator-gateway":
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect(('127.0.0.1', 6700))
+    #sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    #sock.connect(('127.0.0.1', 6700))
 
-    sock.send(b'accumulator\n')
+    #sock.send(b'accumulator\n')
     accumulator().start()
 
-    PHIDIAS.run_net(globals(), 'gateway', sock)
+    PHIDIAS.run_net(globals(), 'gateway', ('127.0.0.1', 6700), 'accumulator', 'xxx')
 elif sys.argv[1] == "--main-gateway":
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect(('127.0.0.1', 6700))
+    #sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    #sock.connect(('127.0.0.1', 6700))
 
-    sock.send(b'main\n')
+    #sock.send(b'main\n')
     main().start()
 
-    PHIDIAS.run_net(globals(), 'gateway', sock)
+    PHIDIAS.run_net(globals(), 'gateway', ('127.0.0.1', 6700), 'main')
 else:
     exit("Invalid command-line")
 
