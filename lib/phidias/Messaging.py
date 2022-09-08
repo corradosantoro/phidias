@@ -6,6 +6,7 @@
 import json
 import sys
 import threading
+import socket
 
 # Depending on the selected protocol, beliefs will be sent using different functions
 send_belief_impl = None

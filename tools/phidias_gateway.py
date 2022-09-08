@@ -197,10 +197,10 @@ async def _embedded_conn_handler(reader, writer):
     device = DEVICES_BY_NAME.get(device_name, None)
 
     if device is None:
-        logging.error('Failed to identify device {!a} connecting from {}'.format(device_name, writer.get_extra_info('peername')))
-        writer.close()
+       logging.error('Failed to identify device {!a} connecting from {}'.format(device_name, writer.get_extra_info('peername')))
+       writer.close()
     else:
-        return await device.accept_tcp_connection(reader, writer)
+       return await device.accept_tcp_connection(reader, writer)
 
 
 loop = asyncio.get_event_loop()

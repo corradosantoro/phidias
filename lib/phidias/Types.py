@@ -83,9 +83,15 @@ class Variable(object):
 #
 # -----------------------------------------------
 def def_vars(*vlist):
+    if sys.implementation.name == "micropython":
+        g = vlist[0]
+        vlist = vlist[1:]
     for v in vlist:
         var = Variable(v)
-        globals()['__builtins__'][v] = var
+        if sys.implementation.name != "micropython":
+            globals()['__builtins__'][v] = var
+        else:
+            g[v] = var
         GVARS.variables[v] = var
 
 def def_actor(a):
