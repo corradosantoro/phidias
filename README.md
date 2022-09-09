@@ -32,7 +32,7 @@ On unix systems it is possible to install the tool in two ways:
 2. Use `setup.cfg`:
 
    ```bash
-   $ pip install -e .[unix]
+   $ pip install .[unix]
    ```
 
 
@@ -42,7 +42,7 @@ On unix systems it is possible to install the tool in two ways:
 On Windows it is possible to install the tool using `setup.cfg`:
 
 ```bash
-$ pip install -e .[win]
+$ pip install .[win]
 ```
 
 This command also works with [conda](https://docs.conda.io/en/latest/).
@@ -51,7 +51,17 @@ This command also works with [conda](https://docs.conda.io/en/latest/).
 
 >  **Please note:**
 >
-> [readline](https://pypi.org/project/gnureadline/) doesn't work with Windows, so the alternative [pyreadline3](https://pypi.org/project/pyreadline3/) was used.
+>  [readline](https://pypi.org/project/gnureadline/) doesn't work with Windows, so the alternative [pyreadline3](https://pypi.org/project/pyreadline3/) was used. For this reason there is a bug!
+>
+>  If you try to use any example in phidias, as shown in the image, you will not receive any output.
+>
+>  ![NoWork](./assets/NoWork.PNG)
+>  
+>
+>  To receive an output you have to make the terminal start scrolling.
+>
+>  ![Work](./assets/Work.PNG)
+>  
 
 
 
@@ -76,6 +86,6 @@ eShell: main > fact(10)
 The program will compute the factorial of 10 and will show:
 
 ```tex
-the resuilting factorial is  3628800
+the resuilting factorial is 3628800
 ```
 
