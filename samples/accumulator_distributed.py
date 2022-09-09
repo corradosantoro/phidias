@@ -47,12 +47,20 @@ class main(Agent):
 
 if sys.argv[1] == "--accumulator-http":
     accumulator().start()
-
     PHIDIAS.run_net(globals(), 'http')
+
 elif sys.argv[1] == "--main-http":
     main().start()
-
     PHIDIAS.run_net(globals(), 'http', 6767)
+
+elif sys.argv[1] == "--accumulator-raw":
+    accumulator().start()
+    PHIDIAS.run_net(globals(), 'raw')
+
+elif sys.argv[1] == "--main-raw":
+    main().start()
+    PHIDIAS.run_net(globals(), 'raw', 6767)
+
 elif sys.argv[1] == "--accumulator-gateway":
     #sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     #sock.connect(('127.0.0.1', 6700))

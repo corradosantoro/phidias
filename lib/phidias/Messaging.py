@@ -89,7 +89,7 @@ else:
         PhidiasHTTPServer_RequestHandler.port = port
         httpd = HTTPServer(server_address, PhidiasHTTPServer_RequestHandler)
         print("")
-        print("\tPHIDIAS Messaging Server is running at port ", port)
+        print("\tPHIDIAS HTTP Messaging Server is running at port ", port)
         print("")
         print("")
         #print(httpd.socket)
@@ -201,6 +201,131 @@ def start_message_server_gateway(engines, _globals, gateway_address, device):
     gateway_sock.send(device.encode('ascii') + b'\n')
 
     h = GatewayConnectionHandler(engines, _globals, gateway_sock)
+    send_belief_impl = h.send_belief
+    t = threading.Thread(target = h.server_thread)
+    t.daemon = True
+    t.start()
+    return t
+
+
+class SocketMessageHandler:
+    def __init__(self, engines, _globals, sock, clientaddress):
+        self.engines = engines
+        self._globals = _globals
+        self.sock = sock
+        self.clientaddress = clientaddress
+
+
+    def server_thread(self):
+        incoming_buffer = b''
+        while True:
+            try:
+                new_data = self.sock.recv(64)
+            except:
+                #print("Connection reset")
+                return
+            if len(new_data) == 0:
+                try:
+                    self.sock.close()
+                except:
+                    pass
+                return
+            incoming_buffer += new_data
+
+            while True:
+                nl_pos = incoming_buffer.find(b"\n")
+                if nl_pos < 0:
+                    break  # no full message yet, keep on waiting
+
+                message_payload = json.loads(incoming_buffer[:nl_pos])
+                incoming_buffer = incoming_buffer[nl_pos + 1:]
+
+                # Process the message
+                from_address = self.clientaddress[0]
+                #print(message_payload)
+                #print(from_address)
+                response = process_incoming_request(self.engines, self._globals, from_address, message_payload)
+
+                json_response = json.dumps(response).encode('ascii') + b'\n'
+                #print(json_response)
+                self.sock.sendall(json_response)
+
+
+class SocketConnectionHandler:
+    def __init__(self, engines, _globals, port):
+        self.engines = engines
+        self._globals = _globals
+        self.port = port
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.bind(('', self.port))
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.sock.listen(5)
+
+
+    def send_belief(self, agent_name, destination, belief, source):
+        colon_pos = destination.find(":")
+        if colon_pos < 0:
+            to_address = destination
+            to_port = 6565
+        else:
+            to_address = destination[:colon_pos]
+            to_port = int(destination[colon_pos + 1:])
+
+        # Prepare payload
+        payload = { 'from' : source,
+                    'net-port': self.port,
+                    'to': agent_name,
+                    'data' : ['belief', [ belief.name(), belief.string_terms() ] ] }
+        json_payload = json.dumps(payload).encode('ascii') + b'\n'
+        #print('PAYLOAD:', payload)
+
+        # Send request
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.connect( (to_address, to_port) )
+        sock.sendall(json_payload)
+
+        incoming_buffer = b''
+        while True:
+            try:
+                new_data = self.sock.recv(64)
+            except:
+                #print("Connection reset")
+                return
+            if len(new_data) == 0:
+                raise RuntimeError('Lost connection to gateway')
+            incoming_buffer += new_data
+
+            while True:
+                nl_pos = incoming_buffer.find(b"\n")
+                if nl_pos < 0:
+                    break  # no full message yet, keep on waiting
+
+                response_payload = json.loads(incoming_buffer[:nl_pos])
+                #print(response_payload)
+                incoming_buffer = incoming_buffer[nl_pos + 1:]
+                if 'result' in response_payload:  # response to our request
+                    if response_payload['result'] != "ok":
+                        print("Messaging Error: ", reply)
+                    sock.close()
+                    return;
+
+
+    def server_thread(self):
+        print("")
+        print("\tPHIDIAS Socket Messaging Server is running at port ", self.port)
+        print("")
+        print("")
+        while True:
+            (clientSocket, clientAddress) = self.sock.accept()
+            h = SocketMessageHandler(self.engines, self._globals, clientSocket, clientAddress)
+            t = threading.Thread(target = h.server_thread)
+            t.daemon = True
+            t.start()
+
+def start_message_server_raw(engines, _globals, socket_address = 6565):
+    global send_belief_impl
+
+    h = SocketConnectionHandler(engines, _globals, socket_address)
     send_belief_impl = h.send_belief
     t = threading.Thread(target = h.server_thread)
     t.daemon = True
