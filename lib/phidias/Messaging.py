@@ -192,13 +192,13 @@ class GatewayConnectionHandler:
                         json_response = json.dumps(response).encode('ascii') + b'\n'
                         self.sock.sendall(json_response)
 
-def start_message_server_gateway(engines, _globals, gateway_address, *agent_list):
+def start_message_server_gateway(engines, _globals, gateway_address, device):
     global send_belief_impl
 
     gateway_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     gateway_sock.connect(gateway_address)
 
-    gateway_sock.send(json.dumps(agent_list).encode('ascii') + b'\n')
+    gateway_sock.send(device.encode('ascii') + b'\n')
 
     h = GatewayConnectionHandler(engines, _globals, gateway_sock)
     send_belief_impl = h.send_belief

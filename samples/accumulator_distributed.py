@@ -43,7 +43,7 @@ class main(Agent):
         +reply(T)[{'from': A}] >> [ show_line("New total is ", T) ]
 
 # If using the 'gateway' variant, run also
-#   phidias_gateway.py -a 127.0.0.1 -p 6700 [accumulator:6565] [main:6767]
+#   message_gateway.py -a 127.0.0.1 -p 6700 [accumulator:6565] [main:6767]
 
 if sys.argv[1] == "--accumulator-http":
     accumulator().start()
