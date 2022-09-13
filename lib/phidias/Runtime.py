@@ -686,7 +686,8 @@ class Runtime:
     def run_net(cls, _globals, protocol_type, *args, **kwargs):
         SUPPORTED_PROTOCOL_TYPES = {
             'http': start_message_server_http,
-            'gateway': start_message_server_gateway }
+            'gateway': start_message_server_gateway,
+            'raw': start_message_server_raw }
 
         protocol_impl = SUPPORTED_PROTOCOL_TYPES[protocol_type]
         protocol_impl(Runtime.engines, _globals, *args, **kwargs)

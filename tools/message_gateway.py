@@ -193,16 +193,14 @@ async def dispatch_message(request_dict, sender_device):
 async def _embedded_conn_handler(reader, writer):
     logging.info('Accepted TCP connection from {}'.format(writer.get_extra_info('peername')))
 
-    devices_name = (await reader.readline()).strip().decode('ascii')
-    for device_name in json.loads(devices_name):
-        print(device_name)
-        device = DEVICES_BY_NAME.get(device_name, None)
+    device_name = (await reader.readline()).strip().decode('ascii')
+    device = DEVICES_BY_NAME.get(device_name, None)
 
-        if device is None:
-            logging.error('Failed to identify device {!a} connecting from {}'.format(device_name, writer.get_extra_info('peername')))
-            writer.close()
-        else:
-            return await device.accept_tcp_connection(reader, writer)
+    if device is None:
+        logging.error('Failed to identify device {!a} connecting from {}'.format(device_name, writer.get_extra_info('peername')))
+        writer.close()
+    else:
+        return await device.accept_tcp_connection(reader, writer)
 
 
 loop = asyncio.get_event_loop()
