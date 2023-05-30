@@ -11,12 +11,12 @@ from phidias.Runtime import *
 from phidias.Exceptions import *
 from functools import reduce
 
-__all__ = [ 'Belief', 'Reactor', 'SingletonBelief', 'Goal',
-            'Action', 'Procedure', 'ActiveBelief',
-            'def_vars', 'def_actor',
-            'AddBeliefEvent', 'DeleteBeliefEvent',
-            'Sensor', 'AsyncSensor',
-            'DATA_TYPE_REACTOR' ]
+__all__ = ['Belief', 'Reactor', 'SingletonBelief', 'Goal',
+           'Action', 'Procedure', 'ActiveBelief',
+           'def_vars', 'def_actor',
+           'AddBeliefEvent', 'DeleteBeliefEvent',
+           'Sensor', 'AsyncSensor',
+           'DATA_TYPE_REACTOR']
 
 CONSTANT = 0
 VARIABLE = 1
@@ -24,6 +24,7 @@ VARIABLE = 1
 DATA_TYPE_BELIEF = 1
 DATA_TYPE_REACTOR = 2
 DATA_TYPE_SINGLETON_BELIEF = 3
+
 
 # -----------------------------------------------
 class Constant(object):
@@ -33,7 +34,7 @@ class Constant(object):
         self.value = uTerm
 
     def __repr__(self):
-       return repr(self.value)
+        return repr(self.value)
 
     def __call__(self, *args):
         return self.value
@@ -54,10 +55,10 @@ class Variable(object):
         self.value = None
 
     def __repr__(self):
-        if (self.value is None)or(not(GVARS.show_variable_values)):
+        if (self.value is None) or (not (GVARS.show_variable_values)):
             return self.name
         else:
-            #return repr(self.name) + "(" + repr(self.value) + ")"
+            # return repr(self.name) + "(" + repr(self.value) + ")"
             return repr(self.__class__.__name__) + "(" + repr(self.value) + ")"
 
     def __call__(self, *args):
@@ -66,7 +67,7 @@ class Variable(object):
         return self.value
 
     def __le__(self, uTerm):
-        if not(isinstance(uTerm, Procedure)) and not(isinstance(uTerm, Action)):
+        if not (isinstance(uTerm, Procedure)) and not (isinstance(uTerm, Action)):
             raise NotAProcedureException()
         uTerm.assignment = self
         return uTerm
@@ -94,8 +95,10 @@ def def_vars(*vlist):
             g[v] = var
         GVARS.variables[v] = var
 
+
 def def_actor(a):
     Runtime.agent(a)
+
 
 # -----------------------------------------------
 class AtomicFormula(object):
@@ -112,13 +115,13 @@ class AtomicFormula(object):
             repr_string = self.__class__.__name__ + "()"
         else:
             repr_string = self.__class__.__name__ + "(" + \
-                reduce (lambda x,y : x + ", " + y,
-                        map (lambda x: repr(x), self.__terms)) + \
-                        ")"
+                          reduce(lambda x, y: x + ", " + y,
+                                 map(lambda x: repr(x), self.__terms)) + \
+                          ")"
         return repr_string
 
     def clone(self):
-        t = [ ]
+        t = []
         for term in self.__terms:
             if isinstance(term, Variable):
                 t.append(term.clone())
@@ -142,7 +145,7 @@ class AtomicFormula(object):
         self.__terms = t
 
     def string_terms(self):
-        return [ x.value for x in self.__terms ]
+        return [x.value for x in self.__terms]
 
     def bind(self, b):
         self.__bindings = b
@@ -169,12 +172,11 @@ class AtomicFormula(object):
         for i in range(0, l):
             Lhs = self.__terms[i]
             Rhs = uTerms[i]
-            if (Lhs.type == VARIABLE)or(Rhs.type == VARIABLE):
+            if (Lhs.type == VARIABLE) or (Rhs.type == VARIABLE):
                 return True
             if Lhs.value != Rhs.value:
                 return False
         return True
-
 
     # self --> belief with constant terms
     # uT ----> belief with variables
@@ -192,14 +194,13 @@ class AtomicFormula(object):
                 if Rhs.name in self.__bindings:
                     value = self.__bindings[Rhs.name]
                 else:
-                    value = Lhs.value # var unbound, get the same value of Lhs
+                    value = Lhs.value  # var unbound, get the same value of Lhs
                     self.__bindings[Rhs.name] = value
             else:
                 value = Rhs.value
             if Lhs.value != value:
                 return False
         return True
-
 
     # self --> belief with constant terms or varibles
     # uT ----> belief with variables
@@ -216,7 +217,7 @@ class AtomicFormula(object):
                     value = self.__bindings[Lhs.name]
                 else:
                     if Rhs.type == VARIABLE:
-                        continue #var unbound, true in any case
+                        continue  # var unbound, true in any case
                     else:
                         # lhs variable, but rhs constant... NO!
                         return False
@@ -225,14 +226,13 @@ class AtomicFormula(object):
                     if Rhs.name in self.__bindings:
                         value = self.__bindings[Rhs.name]
                     else:
-                        value = Lhs.value # var unbound, get the same value of Lhs
+                        value = Lhs.value  # var unbound, get the same value of Lhs
                         self.__bindings[Rhs.name] = value
                 else:
                     value = Rhs.value
             if Lhs.value != value:
                 return False
         return True
-
 
     def assign(self, ctx):
         for i in range(len(self.__terms)):
@@ -266,7 +266,6 @@ class AtomicFormula(object):
 
 # -------------------------------------------------
 class AddDelBeliefEvent:
-
     ADD = 1
     DEL = 2
 
@@ -322,7 +321,6 @@ class AddDelBeliefEvent:
             raise InvalidContextException()
 
 
-
 # -------------------------------------------------
 class AddBeliefEvent(AddDelBeliefEvent):
 
@@ -333,6 +331,7 @@ class AddBeliefEvent(AddDelBeliefEvent):
     def sign(self):
         return '+'
 
+
 # -------------------------------------------------
 class DeleteBeliefEvent(AddDelBeliefEvent):
 
@@ -342,6 +341,7 @@ class DeleteBeliefEvent(AddDelBeliefEvent):
 
     def sign(self):
         return '-'
+
 
 # -----------------------------------------------
 class Belief(AtomicFormula):
@@ -420,7 +420,7 @@ class ActiveBelief(AtomicFormula):
         args = []
         for t in self.terms():
             if t.type == CONSTANT:
-                args.append(t) #.value)
+                args.append(t)  # .value)
             elif t.type == VARIABLE:
                 if t.name in ctx:
                     t.value = ctx[t.name]
@@ -434,9 +434,9 @@ class ActiveBelief(AtomicFormula):
         else:
             return False
 
-
     def evaluate(self, *args):
         raise MethodNotOverriddenException()
+
 
 # -----------------------------------------------
 class Action(AtomicFormula):
@@ -456,7 +456,7 @@ class Action(AtomicFormula):
         ca.assignment = self.assignment
         return ca
 
-    #def __getattr__(self, uAttrName):
+    # def __getattr__(self, uAttrName):
     #    self.method = getattr(self.__class__,  'on_' + uAttrName )
     #    return self
 
@@ -478,7 +478,7 @@ class Action(AtomicFormula):
         if self.method is None:
             rv = self.execute(*args)
         else:
-            #if sys.implementation.name == "micropython":
+            # if sys.implementation.name == "micropython":
             args.insert(0, self)
             rv = self.method(*args)
         for t in self.terms():
@@ -487,7 +487,6 @@ class Action(AtomicFormula):
                     ctx[t.name] = t.value
         return rv
 
-
     def execute(self, *args):
         raise MethodNotOverriddenException()
 
@@ -495,21 +494,22 @@ class Action(AtomicFormula):
 # ------------------------------------------------
 class ContextCondition(object):
 
-    def __init__(self, lhs, rhs = None):
+    def __init__(self, lhs, rhs=None):
         if rhs is None:
-            self.__condition_terms = [ lhs ]
+            self.__condition_terms = [lhs]
         else:
-            self.__condition_terms = [ lhs, rhs ]
+            self.__condition_terms = [lhs, rhs]
 
     def __repr__(self):
         repr_string = "(" + \
-            reduce (lambda x,y : x + " & " + y,
-                    map (lambda x: repr(x), self.__condition_terms)) + \
-                    ")"
+                      reduce(lambda x, y: x + " & " + y,
+                             map(lambda x: repr(x), self.__condition_terms)) + \
+                      ")"
         return repr_string
 
     def __and__(self, rhs):
-        if isinstance(rhs, Belief) or isinstance(rhs, ActiveBelief) or isinstance(rhs, Goal) or type(rhs) == types.LambdaType:
+        if isinstance(rhs, Belief) or isinstance(rhs, ActiveBelief) or isinstance(rhs, Goal) or type(
+                rhs) == types.LambdaType:
             self.__condition_terms.append(rhs)
             return self
         else:
@@ -521,7 +521,6 @@ class ContextCondition(object):
 
 # -------------------------------------------------
 class Procedure(AtomicFormula):
-
     PROC = 3
     PROC_CANCEL = 4
 
@@ -647,8 +646,6 @@ class Goal(AtomicFormula):
         return self.__context_condition
 
 
-
-
 # -----------------------------------------------
 # BASIC SENSOR
 # This is the basic sensor class.
@@ -689,26 +686,25 @@ class SensorStopper(Action):
 
 
 class Sensor(Action):
-
-    METHODS = [ 'bind', 'unbind', 'start', 'stop' ]
+    METHODS = ['bind', 'unbind', 'start', 'stop']
 
     def __init__(self, *args, **kwargs):
         Action.__init__(self, *args, **kwargs)
         self.thread = None
         self._stopped = False
-        #self.start = SensorStarter(*args)
-        #self.start.sensor = self
-        #self.stop = SensorStopper(*args)
-        #self.stop.sensor = self
+        # self.start = SensorStarter(*args)
+        # self.start.sensor = self
+        # self.stop = SensorStopper(*args)
+        # self.stop.sensor = self
 
     def clone(self):
         cs = super(Sensor, self).clone()
         cs.thread = self.thread
         cs._stopped = self.stopped
-        #cs.start = self.start
-        #cs.start.sensor = cs
-        #cs.stop = self.stop
-        #cs.stop.sensor = cs
+        # cs.start = self.start
+        # cs.start.sensor = cs
+        # cs.stop = self.stop
+        # cs.stop.sensor = cs
         return cs
 
     def start(self):
@@ -737,7 +733,7 @@ class Sensor(Action):
             self.engine.add_sensor(self)
             self._stopped = False
             self.on_start(*args)
-            t = threading.Thread(target = self.do_sense)
+            t = threading.Thread(target=self.do_sense)
             t.daemon = True
             t.start()
             self.thread = t

@@ -3,10 +3,7 @@
 #
 
 
-#from __future__ import print_function
-
-import sys
-
+# from __future__ import print_function
 
 class Knowledge(object):
 
@@ -16,17 +13,17 @@ class Knowledge(object):
     def add_belief(self, bel):
         n = bel.name()
         if n in self.__kb:
-            if not(bel in self.__kb[n]):
+            if not (bel in self.__kb[n]):
                 from phidias.Types import SingletonBelief
                 if isinstance(bel, SingletonBelief):
-                    self.__kb[n] = [ bel ]
+                    self.__kb[n] = [bel]
                 else:
                     self.__kb[n].append(bel)
                 return True
             else:
                 return False
         else:
-            self.__kb[n] = [ bel ]
+            self.__kb[n] = [bel]
             return True
 
     def remove_belief(self, bel):
@@ -43,7 +40,6 @@ class Knowledge(object):
     def base(self):
         return self.__kb
 
-
     def show(self):
         c = 0
         for k in self.__kb.keys():
@@ -56,14 +52,12 @@ class Knowledge(object):
                     c += 1
         print("")
 
-
     def get_matching_beliefs(self, uTemplate):
         n = uTemplate.name()
         ret = []
-        if not(n in self.__kb):
+        if not (n in self.__kb):
             return ret
         for b in self.__kb[n]:
             if uTemplate.match_constants(b):
                 ret.append(b)
         return ret
-
