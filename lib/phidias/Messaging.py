@@ -2,17 +2,17 @@
 #
 #
 
-#from __future__ import print_function
+# from __future__ import print_function
 import json
 import sys
 import threading
 import socket
+from Exceptions import InvalidDestinationException
 
 # Depending on the selected protocol, beliefs will be sent using different functions
 send_belief_impl = None
 
-
-### "http" protocol
+# "http" protocol
 
 if sys.implementation.name == "micropython":
     def start_message_server_http(engines, _globals, port):
@@ -24,6 +24,7 @@ else:
 
     import requests
 
+
     class PhidiasHTTPServer_RequestHandler(BaseHTTPRequestHandler):
 
         engines = None
@@ -32,10 +33,10 @@ else:
 
         def do_GET(self):
             self.send_response(500)
-            #self.send_header('Content-type','text/html')
-            #self.end_headers()
-            #message = "Hello world!"
-            #self.wfile.write(bytes(message, "utf8"))
+            # self.send_header('Content-type','text/html')
+            # self.end_headers()
+            # message = "Hello world!"
+            # self.wfile.write(bytes(message, "utf8"))
             return
 
         def do_POST(self):
@@ -71,18 +72,19 @@ else:
         if port is None:
             port = 6565
 
-        payload = { 'from' : source,
-                    'net-port': PhidiasHTTPServer_RequestHandler.port,
-                    'to': agent_name,
-                    'data' : ['belief', [ belief.name(), belief.string_terms() ] ] }
+        payload = {'from': source,
+                   'net-port': PhidiasHTTPServer_RequestHandler.port,
+                   'to': agent_name,
+                   'data': ['belief', [belief.name(), belief.string_terms()]]}
 
         json_payload = json.dumps(payload)
-        #print(json_payload)
+        # print(json_payload)
         new_url = "http://" + parsed_url.hostname + ":" + str(port)
         r = requests.post(new_url, data=json_payload)
         reply = json.loads(r.text)
         if reply['result'] != "ok":
             print("Messaging Error: ", reply)
+
 
     def server_thread_http(port):
         server_address = ('', port)
@@ -92,17 +94,18 @@ else:
         print("\tPHIDIAS HTTP Messaging Server is running at port ", port)
         print("")
         print("")
-        #print(httpd.socket)
+        # print(httpd.socket)
         httpd.serve_forever()
         server_thread()
 
-    def start_message_server_http(engines, _globals, port = 6565):
+
+    def start_message_server_http(engines, _globals, port=6565):
         global send_belief_impl
         send_belief_impl = send_belief_http
 
         PhidiasHTTPServer_RequestHandler.engines = engines
         PhidiasHTTPServer_RequestHandler._globals = _globals
-        t = threading.Thread(target = server_thread_http, args = (port, ))
+        t = threading.Thread(target=server_thread_http, args=(port,))
         t.daemon = True
         t.start()
         return t
@@ -127,6 +130,7 @@ class GatewayConnectionSentRequest:  # Future-like object
 
         return self._result
 
+
 class GatewayConnectionHandler:
     def __init__(self, engines, _globals, sock):
         self.engines = engines
@@ -146,13 +150,13 @@ class GatewayConnectionHandler:
             to_port = int(destination[colon_pos + 1:])
 
         # Prepare payload
-        payload = { 'from' : source,
-                    'to': agent_name,
-                    'data' : ['belief', [ belief.name(), belief.string_terms() ] ],
-                    'to-address': to_address,
-                    'to-port': to_port }
+        payload = {'from': source,
+                   'to': agent_name,
+                   'data': ['belief', [belief.name(), belief.string_terms()]],
+                   'to-address': to_address,
+                   'to-port': to_port}
         json_payload = json.dumps(payload).encode('ascii') + b'\n'
-        #print('PAYLOAD:', payload)
+        # print('PAYLOAD:', payload)
 
         # Send request
         req = GatewayConnectionSentRequest()
@@ -192,6 +196,7 @@ class GatewayConnectionHandler:
                         json_response = json.dumps(response).encode('ascii') + b'\n'
                         self.sock.sendall(json_response)
 
+
 def start_message_server_gateway(engines, _globals, gateway_address, device):
     global send_belief_impl
 
@@ -202,7 +207,7 @@ def start_message_server_gateway(engines, _globals, gateway_address, device):
 
     h = GatewayConnectionHandler(engines, _globals, gateway_sock)
     send_belief_impl = h.send_belief
-    t = threading.Thread(target = h.server_thread)
+    t = threading.Thread(target=h.server_thread)
     t.daemon = True
     t.start()
     return t
@@ -215,14 +220,13 @@ class SocketMessageHandler:
         self.sock = sock
         self.clientaddress = clientaddress
 
-
     def server_thread(self):
         incoming_buffer = b''
         while True:
             try:
                 new_data = self.sock.recv(64)
             except:
-                #print("Connection reset")
+                # print("Connection reset")
                 return
             if len(new_data) == 0:
                 try:
@@ -242,12 +246,12 @@ class SocketMessageHandler:
 
                 # Process the message
                 from_address = self.clientaddress[0]
-                #print(message_payload)
-                #print(from_address)
+                # print(message_payload)
+                # print(from_address)
                 response = process_incoming_request(self.engines, self._globals, from_address, message_payload)
 
                 json_response = json.dumps(response).encode('ascii') + b'\n'
-                #print(json_response)
+                # print(json_response)
                 self.sock.sendall(json_response)
 
 
@@ -261,7 +265,6 @@ class SocketConnectionHandler:
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sock.listen(5)
 
-
     def send_belief(self, agent_name, destination, belief, source):
         colon_pos = destination.find(":")
         if colon_pos < 0:
@@ -272,16 +275,16 @@ class SocketConnectionHandler:
             to_port = int(destination[colon_pos + 1:])
 
         # Prepare payload
-        payload = { 'from' : source,
-                    'net-port': self.port,
-                    'to': agent_name,
-                    'data' : ['belief', [ belief.name(), belief.string_terms() ] ] }
+        payload = {'from': source,
+                   'net-port': self.port,
+                   'to': agent_name,
+                   'data': ['belief', [belief.name(), belief.string_terms()]]}
         json_payload = json.dumps(payload).encode('ascii') + b'\n'
-        #print('PAYLOAD:', payload)
+        # print('PAYLOAD:', payload)
 
         # Send request
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.connect( (to_address, to_port) )
+        sock.connect((to_address, to_port))
         sock.sendall(json_payload)
 
         incoming_buffer = b''
@@ -289,7 +292,7 @@ class SocketConnectionHandler:
             try:
                 new_data = self.sock.recv(64)
             except:
-                #print("Connection reset")
+                # print("Connection reset")
                 return
             if len(new_data) == 0:
                 raise RuntimeError('Lost connection to gateway')
@@ -301,14 +304,13 @@ class SocketConnectionHandler:
                     break  # no full message yet, keep on waiting
 
                 response_payload = json.loads(incoming_buffer[:nl_pos])
-                #print(response_payload)
+                # print(response_payload)
                 incoming_buffer = incoming_buffer[nl_pos + 1:]
                 if 'result' in response_payload:  # response to our request
                     if response_payload['result'] != "ok":
                         print("Messaging Error: ", reply)
                     sock.close()
                     return;
-
 
     def server_thread(self):
         print("")
@@ -318,16 +320,17 @@ class SocketConnectionHandler:
         while True:
             (clientSocket, clientAddress) = self.sock.accept()
             h = SocketMessageHandler(self.engines, self._globals, clientSocket, clientAddress)
-            t = threading.Thread(target = h.server_thread)
+            t = threading.Thread(target=h.server_thread)
             t.daemon = True
             t.start()
 
-def start_message_server_raw(engines, _globals, socket_address = 6565):
+
+def start_message_server_raw(engines, _globals, socket_address=6565):
     global send_belief_impl
 
     h = SocketConnectionHandler(engines, _globals, socket_address)
     send_belief_impl = h.send_belief
-    t = threading.Thread(target = h.server_thread)
+    t = threading.Thread(target=h.server_thread)
     t.daemon = True
     t.start()
     return t
@@ -336,9 +339,9 @@ def start_message_server_raw(engines, _globals, socket_address = 6565):
 ### protocol-independent
 
 def process_incoming_request(engines, _globals, from_address, payload):
-    response = { 'result' : 'err',
-                'reason' : 'Malformed HTTP payload',
-                'data'   : payload }
+    response = {'result': 'err',
+                'reason': 'Malformed HTTP payload',
+                'data': payload}
     if 'from' in payload.keys():
         if 'net-port' in payload.keys():
             if 'to' in payload.keys():
@@ -354,23 +357,24 @@ def process_incoming_request(engines, _globals, from_address, payload):
                         _from = _from + "@" + from_address + ":" + repr(_net_port)
                     if _to in engines.keys():
                         if _data[0] == 'belief':
-                            [ Name, Terms ] = _data[1]
+                            [Name, Terms] = _data[1]
                             k = _globals[Name]
                             b = k()
                             b.make_terms(Terms)
                             b.source_agent = _from
                             e = engines[_to]
                             e.add_belief(b)
-                            response = { 'result' : 'ok' }
+                            response = {'result': 'ok'}
                         else:
-                            response = { 'result' : 'err',
-                                        'reason' : 'Invalid verb',
-                                        'data'   : _data }
+                            response = {'result': 'err',
+                                        'reason': 'Invalid verb',
+                                        'data': _data}
                     else:
-                        response = { 'result' : 'err',
-                                    'reason' : 'Destination agent not found',
-                                    'data'   : _to }
+                        response = {'result': 'err',
+                                    'reason': 'Destination agent not found',
+                                    'data': _to}
     return response
+
 
 class Messaging:
     @classmethod

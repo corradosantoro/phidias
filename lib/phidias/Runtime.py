@@ -3,17 +3,17 @@
 #
 
 import types
-import threading
-#import copy
 
 from phidias.Types import *
 from phidias.Knowledge import *
 from phidias.Exceptions import *
-from phidias.Messaging import *
+
+# import copy
 
 DEFAULT_AGENT = "main"
 
-__all__ = [ 'DEFAULT_AGENT', 'Runtime', 'Plan' ]
+__all__ = ['DEFAULT_AGENT', 'Runtime', 'Plan']
+
 
 # ------------------------------------------------
 class EventQueue:
@@ -22,7 +22,7 @@ class EventQueue:
         self.__c = threading.Condition()
         self.__data = []
         self.__size = 0
-        self.__subscriptions = { }
+        self.__subscriptions = {}
 
     def subscribe(self, uEvt):
         self.__c.acquire()
@@ -53,7 +53,7 @@ class EventQueue:
             self.__c.notify()
         self.__c.release()
 
-    def get(self, timeout = None):
+    def get(self, timeout=None):
         self.__c.acquire()
 
         while self.__size == 0:
@@ -83,9 +83,9 @@ class EventQueue:
         self.__c.acquire()
 
         for e in self.__data:
-            #print("%d,%d - %s,%s" % (e.event_type, uType, repr(e.get_belief()), uBel))
-            if (e.event_type == uType)and(e.get_belief() == uBel):
-                #print(type(e))
+            # print("%d,%d - %s,%s" % (e.event_type, uType, repr(e.get_belief()), uBel))
+            if (e.event_type == uType) and (e.get_belief() == uBel):
+                # print(type(e))
                 self.__data.remove(e)
                 self.__size -= 1
                 self.__c.release()
@@ -98,7 +98,7 @@ class EventQueue:
 # ------------------------------------------------
 class Plan:
 
-    def __init__(self, uEvent, uContextCondition = None, uActions = []):
+    def __init__(self, uEvent, uContextCondition=None, uActions=[]):
         self.__event = uEvent
         self.__context_condition = uContextCondition
         self.__actions = uActions
@@ -117,7 +117,7 @@ class Plan:
             return repr(self.__event) + " >> " + repr(self.__actions)
         else:
             return repr(self.__event) + \
-              " / " + repr(self.__context_condition) + " >> " + repr(self.__actions)
+                " / " + repr(self.__context_condition) + " >> " + repr(self.__actions)
 
     def __rshift__(self, actionList):
         if isinstance(actionList, list):
@@ -140,7 +140,7 @@ class PlanBase:
         if name in self.__plans:
             self.__plans[name].append(p)
         else:
-            self.__plans[name] = [ p ]
+            self.__plans[name] = [p]
 
     def get_plans_from_event(self, uEvt):
         name = uEvt.name()
@@ -150,15 +150,15 @@ class PlanBase:
             return []
 
     def list_all_plans(self):
-        all_plans = [ ]
+        all_plans = []
         for b in self.__plans:
             for p in self.__plans[b]:
                 all_plans.append(p)
         return all_plans
 
+
 # ------------------------------------------------
 class Intention:
-
     INTENTION_NEXT = 0
     INTENTION_END = 1
     INTENTION_PROC = 2
@@ -177,7 +177,7 @@ class Intention:
 
     def execute_next(self, last_ret_value):
         if self.__action_index == self.__action_len:
-            return (Intention.INTENTION_END, None) # end of execution
+            return (Intention.INTENTION_END, None)  # end of execution
 
         if self.__pending_assignment is not None:
             self.__context[self.__pending_assignment] = last_ret_value
@@ -193,7 +193,7 @@ class Intention:
                 self.__context[a.assignment.name] = ret_val
         elif isinstance(a, AddBeliefEvent):
             # FIXME! Check if the event queue has already a analogous "-" event
-            #copied_b = copy.deepcopy(a.get_belief())
+            # copied_b = copy.deepcopy(a.get_belief())
             copied_b = a.get_belief().clone()
             copied_b.assign(self.__context)
             if copied_b.dest is None:
@@ -206,21 +206,21 @@ class Intention:
                 (remote_agent, a_name, site_name) = Messaging.local_or_remote(d)
                 if remote_agent:
                     Messaging.send_belief(a_name, site_name, copied_b, self.__engine.agent())
-                    #print("Remote messaging to {}@{} is not supported".format(a_name,site_name))
+                    # print("Remote messaging to {}@{} is not supported".format(a_name,site_name))
                 else:
-                    e = Runtime.get_engine(d) #copied_b.dest)
+                    e = Runtime.get_engine(d)  # copied_b.dest)
                     copied_b.source_agent = self.__engine.agent()
                     e.add_belief(copied_b)
         elif isinstance(a, DeleteBeliefEvent):
             # FIXME! Check if the event queue has already a analogous "+" event
-            #copied_b = copy.deepcopy(a.get_belief())
+            # copied_b = copy.deepcopy(a.get_belief())
             copied_b = a.get_belief().clone()
             copied_b.assign(self.__context)
             self.__engine.remove_belief(copied_b)
         elif isinstance(a, Procedure):
             if a.assignment is not None:
-                self.__pending_assignment = a.assignment.name # get variable name
-            #copied_a = copy.deepcopy(a)
+                self.__pending_assignment = a.assignment.name  # get variable name
+            # copied_a = copy.deepcopy(a)
             copied_a = a.clone()
             copied_a.assign(self.__context)
             return (Intention.INTENTION_PROC, copied_a)
@@ -231,12 +231,13 @@ class Intention:
 
         return (Intention.INTENTION_NEXT, None)
 
+
 # ------------------------------------------------
 class WaitingPlansCollection:
 
     def __init__(self, uEngine):
-        self.__plans_by_proc = { }
-        self.__plans_by_event = { }
+        self.__plans_by_proc = {}
+        self.__plans_by_event = {}
         self.__engine = uEngine
 
     def all(self):
@@ -256,11 +257,11 @@ class WaitingPlansCollection:
                     raise InvalidPlanException()
                 self.__engine.queue().subscribe(e)
                 n1 = e.name()
-                #print("activating event ", n1)
+                # print("activating event ", n1)
                 if n1 in self.__plans_by_event:
                     self.__plans_by_event[n1].append(p)
                 else:
-                    self.__plans_by_event[n1] = [ p ]
+                    self.__plans_by_event[n1] = [p]
 
     def remove(self, uCtxPlan):
         (ctx, plan) = uCtxPlan
@@ -277,10 +278,9 @@ class WaitingPlansCollection:
                 if e is not None:
                     self.__engine.queue().unsubscribe(e)
                     n1 = e.name()
-                    #print("removing event ", n1)
+                    # print("removing event ", n1)
                     if n1 in self.__plans_by_event:
                         self.__plans_by_event[n1].remove(p)
-
 
     def get_plans_from_event(self, uEvt):
         name = uEvt.name()
@@ -289,12 +289,13 @@ class WaitingPlansCollection:
         else:
             return []
 
+
 # ------------------------------------------------
 class SensorCollection(object):
 
     def __init__(self, uEngine):
         self.__engine = uEngine
-        self.__sensors = { }
+        self.__sensors = {}
 
     def add_sensor(self, uSensor):
         self.__sensors[uSensor.__class__.__name__] = uSensor
@@ -311,6 +312,7 @@ class SensorCollection(object):
         if name in self.__sensors:
             del self.__sensors[name]
 
+
 # ------------------------------------------------
 class Engine:
 
@@ -320,7 +322,7 @@ class Engine:
         self.__goals = PlanBase()
         self.__event_queue = EventQueue()
         self.__running = False
-        self.__intentions = [ ]
+        self.__intentions = []
         self.__sensors = SensorCollection(self)
         self.__waiting_plans = WaitingPlansCollection(self)
         self.__agent = uAgentName
@@ -391,20 +393,20 @@ class Engine:
         return self.__waiting_plans
 
     def __unify(self, uVars, uContext_condition):
-        #contexts = [{}]
-        contexts = [ uVars ]
+        # contexts = [{}]
+        contexts = [uVars]
         result = True
-        #print(uContext_condition)
+        # print(uContext_condition)
         from phidias.Types import Belief, ActiveBelief, Goal
         for t in uContext_condition.terms():
             match_result = False
-            #print(t, type(t))
+            # print(t, type(t))
             if isinstance(t, Belief):
                 matching_beliefs = self.__kb.get_matching_beliefs(t)
-                #print (matching_beliefs)
+                # print (matching_beliefs)
                 # "matching_beliefs" contains ground terms
                 # "t" contains variables
-                #print("Term: ", t, " ----> ", matching_beliefs)
+                # print("Term: ", t, " ----> ", matching_beliefs)
                 # here we are sure that "t" and elements in matching_beliefs
                 # contains the same number of terms, moreover constants are
                 # already matched, so we must only check variables
@@ -413,25 +415,25 @@ class Engine:
                     # each matching belief must be tested with each context
                     for c in contexts:
                         new = c.copy()
-                        #print (t, m, new)
+                        # print (t, m, new)
                         m.bind(new)
                         if m.match(t):
-                            #print(new)
+                            # print(new)
                             new_contexts.append(new)
                             match_result = True
-                #print t, new_contexts
+                # print t, new_contexts
                 contexts = new_contexts
             elif type(t) == types.LambdaType:
                 new_contexts = []
                 _bin = globals()['__builtins__']
                 for c in contexts:
-                    for (key,val) in c.items():
+                    for (key, val) in c.items():
                         _bin[key] = val
-                    #print(_bin)
+                    # print(_bin)
                     if t():
                         new_contexts.append(c)
                         match_result = True
-                    for (key,val) in c.items():
+                    for (key, val) in c.items():
                         del _bin[key]
                 contexts = new_contexts
             elif isinstance(t, ActiveBelief):
@@ -444,35 +446,34 @@ class Engine:
             elif isinstance(t, Goal):
                 new_contexts = []
                 for c in contexts:
-                    #print(c, t)
-                    #copied_t = copy.deepcopy(t)
+                    # print(c, t)
+                    # copied_t = copy.deepcopy(t)
                     copied_t = t.clone()
                     copied_t.assign_partial(c)
-                    matching_plans = self.__plans_from_goal(copied_t)#, c)
-                    #print(copied_t, matching_plans)
+                    matching_plans = self.__plans_from_goal(copied_t)  # , c)
+                    # print(copied_t, matching_plans)
                     if matching_plans != []:
-                        for (ctx,p) in matching_plans:
-                            copied_t.assign_vars_from_formula(ctx,p.event())
-                            for (key,val) in c.items():
+                        for (ctx, p) in matching_plans:
+                            copied_t.assign_vars_from_formula(ctx, p.event())
+                            for (key, val) in c.items():
                                 ctx[key] = val
                             new_contexts.append(ctx)
-                            #print(ctx, p.event())
+                            # print(ctx, p.event())
                             match_result = True
                     del copied_t
                 contexts = new_contexts
             else:
                 raise NotABeliefException()
             result = result and match_result
-        #print(uContext_condition, contexts, result)
+        # print(uContext_condition, contexts, result)
         return (result, contexts)
-
 
     # returns the plans matching the triggering event
     def __plans_from_triggering_event(self, uEvt, uPlanBase, uIsWaiting):
-        selected_plans = [ ]
+        selected_plans = []
         event_belief = uEvt.get_belief()
         for p in uPlanBase:
-            context = { }
+            context = {}
 
             if uIsWaiting:
                 b = p.event().additional_event().get_belief()
@@ -491,29 +492,27 @@ class Engine:
 
             event_belief.bind(context)
             if event_belief.match(b):
-                selected_plans.append(  (context, p) )
+                selected_plans.append((context, p))
         return selected_plans
-
 
     # returns the plans matching the procedure
     def __plans_from_procedure(self, uP):
-        non_event_plans = [ ]
-        event_plans = [ ]
+        non_event_plans = []
+        event_plans = []
         for p in self.__plans.get_plans_from_event(uP):
-            context = { }
+            context = {}
             b = p.event()
             uP.bind(context)
             if uP.match(b):
                 if p.event().additional_event() is None:
-                    non_event_plans.append(  (context, p) )
+                    non_event_plans.append((context, p))
                 else:
-                    event_plans.append(  (context, p) )
+                    event_plans.append((context, p))
         return (non_event_plans, event_plans)
 
-
     # returns the plans matching the goal
-    def __plans_from_goal(self, uG, initial_context = {}):
-        goal_plans = [ ]
+    def __plans_from_goal(self, uG, initial_context={}):
+        goal_plans = []
         for p in self.__goals.get_plans_from_event(uG):
             context = initial_context.copy()
             b = p.event()
@@ -522,59 +521,54 @@ class Engine:
                 ok, ctxs = self.__unify(context, p.context_condition())
                 if ok:
                     for c in ctxs:
-                        goal_plans.append( (c, p) )
+                        goal_plans.append((c, p))
         return goal_plans
-
 
     # verify the conditions on plans and returns valid plans
     def find_applicable_plans(self, plans):
-        resulting_plans = [ ]
+        resulting_plans = []
         for (ctx, plan) in plans:
             pred = plan.context_condition()
             if pred is None:
-                resulting_plans.append( (ctx, plan) )
+                resulting_plans.append((ctx, plan))
             else:
                 ok, ctxs = self.__unify(ctx, pred)
                 if ok:
-                    resulting_plans.append( (ctxs[0], plan) )
+                    resulting_plans.append((ctxs[0], plan))
         return resulting_plans
-
 
     # verify the conditions on plans and returns first valid plan
     def find_first_applicable_plan(self, plans):
         for (ctx, plan) in plans:
             pred = plan.context_condition()
             if pred is None:
-                return  ( [ctx], plan)
+                return ([ctx], plan)
             else:
                 ok, ctxs = self.__unify(ctx, pred)
                 if ok:
-                    #print(plan.event(), ctxs)
-                    return  (ctxs, plan)
+                    # print(plan.event(), ctxs)
+                    return (ctxs, plan)
         return (None, None)
-
 
     # verify the conditions on plans and returns first and second valid plans
     def find_first_and_second_applicable_plans(self, plans):
-        ret_plans = [ ]
+        ret_plans = []
         for (ctx, plan) in plans:
             pred = plan.context_condition()
             if pred is None:
-                ret_plans.append( ([ctx], plan) )
+                ret_plans.append(([ctx], plan))
             else:
                 ok, ctxs = self.__unify(ctx, pred)
                 if ok:
-                    #print(plan.event(), ctxs)
-                    ret_plans.append ( (ctxs, plan) )
+                    # print(plan.event(), ctxs)
+                    ret_plans.append((ctxs, plan))
             if len(ret_plans) == 2:
                 break
         return ret_plans
 
-
     def make_intention(self, pctx):
         (context, plan) = pctx
-        self.__intentions.insert( 0, Intention (self, context, plan) )
-
+        self.__intentions.insert(0, Intention(self, context, plan))
 
     def run(self):
         self.__running = True
@@ -587,7 +581,7 @@ class Engine:
             # self.__intentions contains the intention stack,
             # as soon as the intention stack contains plans to be executed
             # events are not processed, so first we execute intentions
-            while self.__intentions != [ ]:
+            while self.__intentions != []:
                 top_intention = self.__intentions[0]
                 (whats_next, evt) = top_intention.execute_next(self.__last_return_value)
                 if whats_next == Intention.INTENTION_END:
@@ -601,11 +595,11 @@ class Engine:
                     break
 
             if evt is None:
-                evt = self.__event_queue.get(0.5) #500millis
+                evt = self.__event_queue.get(0.5)  # 500millis
                 if evt is None:
                     continue
 
-            #print(self.__agent, evt)
+            # print(self.__agent, evt)
 
             from_waiting_plans_flag = False
 
@@ -627,10 +621,10 @@ class Engine:
                     self.__waiting_plans.remove_by_name(evt.basename())
                 (non_event_plans, event_plans) = self.__plans_from_procedure(evt)
                 # now check if plans have also a triggering event
-                if (non_event_plans != [])and(event_plans != []):
+                if (non_event_plans != []) and (event_plans != []):
                     print("Event plans cannot be combined with non-event plans")
                     raise InvalidPlanException()
-                if event_plans != [ ]:
+                if event_plans != []:
                     # the plans relevant to the Procedure call have waiting events,
                     # so we process them by adding to the waiting queue and skip execution
                     self.__waiting_plans.add(evt, event_plans)
@@ -640,9 +634,9 @@ class Engine:
             else:
                 continue
 
-            #plans = self.find_applicable_plans(plans)
+            # plans = self.find_applicable_plans(plans)
             first_and_second_plans = self.find_first_and_second_applicable_plans(plans)
-            if first_and_second_plans == [ ]:
+            if first_and_second_plans == []:
                 continue
             (ctxs, plan) = first_and_second_plans[0]
             plan_to_execute = (ctxs[0], plan)
@@ -654,7 +648,7 @@ class Engine:
                     # push the first plan with all contexts in reverse
                     ctxs.reverse()
                     for c in ctxs:
-                        self.make_intention( (c, plan) )
+                        self.make_intention((c, plan))
                     if from_waiting_plans_flag:
                         self.__waiting_plans.remove(plan_to_execute)
                     continue
@@ -663,7 +657,6 @@ class Engine:
             self.make_intention(plan_to_execute)
             if from_waiting_plans_flag:
                 self.__waiting_plans.remove(plan_to_execute)
-
 
     def __generate_event(self, uEvt):
         from phidias.Types import AddDelBeliefEvent, AddBeliefEvent, DeleteBeliefEvent
@@ -678,8 +671,7 @@ class Engine:
 
 # ------------------------------------------------
 class Runtime:
-
-    engines = { DEFAULT_AGENT : Engine(DEFAULT_AGENT) }
+    engines = {DEFAULT_AGENT: Engine(DEFAULT_AGENT)}
     currentAgent = DEFAULT_AGENT
 
     @classmethod
@@ -687,7 +679,7 @@ class Runtime:
         SUPPORTED_PROTOCOL_TYPES = {
             'http': start_message_server_http,
             'gateway': start_message_server_gateway,
-            'raw': start_message_server_raw }
+            'raw': start_message_server_raw}
 
         protocol_impl = SUPPORTED_PROTOCOL_TYPES[protocol_type]
         protocol_impl(Runtime.engines, _globals, *args, **kwargs)
@@ -695,7 +687,7 @@ class Runtime:
     @classmethod
     def agent(cls, a):
         cls.currentAgent = a
-        if not(cls.currentAgent in cls.engines):
+        if not (cls.currentAgent in cls.engines):
             cls.engines[cls.currentAgent] = Engine(cls.currentAgent)
 
     @classmethod
@@ -709,14 +701,14 @@ class Runtime:
     @classmethod
     def run_agent(cls, a):
         e = cls.engines[a]
-        t = threading.Thread(target = e.run)
+        t = threading.Thread(target=e.run)
         t.start()
 
     @classmethod
     def run_agents(cls):
         for ag in cls.engines:
             e = cls.engines[ag]
-            t = threading.Thread(target = e.run)
+            t = threading.Thread(target=e.run)
             t.start()
 
     @classmethod

@@ -9,5 +9,11 @@ setup(name='PHIDIAS',
       author_email='santoro@dmi.unict.it',
       url='http://github.com/corradosantoro/phidias',
       packages=['phidias'],
-      package_dir={'phidias': 'lib/phidias' }
+      install_requires=[
+            "requests",
+            "parse",
+            "prompt-toolkit"
+      ],
+      python_requires=">=3.6.0",
+      package_dir={'phidias': 'lib/phidias'}
 )

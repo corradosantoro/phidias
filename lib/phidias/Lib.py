@@ -2,18 +2,18 @@
 # Lib.py
 #
 
-#from __future__ import print_function
+# from __future__ import print_function
 
 import sys
 import threading
 import time
 
 from phidias.Types  import *
-from phidias.Runtime  import *
 
-__all__ = [ 'show', 'show_line', 'show_fmt',
-            'eq', 'neq', 'gt', 'geq', 'lt', 'leq',
-            'timeout', 'Timer', 'wait' ]
+__all__ = ['show', 'show_line', 'show_fmt',
+           'eq', 'neq', 'gt', 'geq', 'lt', 'leq',
+           'timeout', 'Timer', 'wait']
+
 
 # ------------------------------------------------
 # ACTIONS
@@ -24,15 +24,18 @@ class show(Action):
         for a in args:
             print(a(), end='')
 
+
 class show_line(show):
     def execute(self, *args):
         show.execute(self, *args)
         print("")
 
+
 class show_fmt(Action):
     def execute(self, *args):
-        t_a = tuple(map(lambda x:x(), args[1:]))
+        t_a = tuple(map(lambda x: x(), args[1:]))
         print(args[0]() % t_a, end='')
+
 
 # ------------------------------------------------
 # PREDICATES
@@ -42,25 +45,31 @@ class eq(ActiveBelief):
     def evaluate(self, x, y):
         return x() == y()
 
+
 class neq(ActiveBelief):
     def evaluate(self, x, y):
         return x() != y()
+
 
 class gt(ActiveBelief):
     def evaluate(self, x, y):
         return x() > y()
 
+
 class geq(ActiveBelief):
     def evaluate(self, x, y):
         return x() >= y()
+
 
 class lt(ActiveBelief):
     def evaluate(self, x, y):
         return x() < y()
 
+
 class leq(ActiveBelief):
     def evaluate(self, x, y):
         return x() <= y()
+
 
 # ------------------------------------------------
 # TIMERS
@@ -70,10 +79,12 @@ class leq(ActiveBelief):
 class timeout(Reactor):
     pass
 
+
 # ------------------------------------------------
 class wait(Action):
     def execute(self, T):
         time.sleep(T() / 1000.0)
+
 
 # ------------------------------------------------
 if sys.implementation.name != "micropython":
@@ -130,4 +141,3 @@ else:
                 else:
                     self.assert_belief(timeout(self.__class__.__name__))
                     return
-

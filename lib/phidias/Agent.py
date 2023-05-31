@@ -6,10 +6,11 @@ from phidias.Types import *
 from phidias.Main import *
 from phidias.Exceptions import *
 
+
 # -------------------------------------------------
 class Agent:
 
-    def __init__(self, name = None):
+    def __init__(self, name=None):
         if name is None:
             self.__name = self.__class__.__name__
         else:
@@ -35,4 +36,3 @@ class Agent:
 
     def main(self):
         raise MethodNotOverriddenException()
-
