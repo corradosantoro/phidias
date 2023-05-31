@@ -8,7 +8,7 @@
 <h3 align="center">PHIDIAS</h3>
 
   <p align="center">
-    <b>P</b>yt<b>H</b>on <b>I</b>nteractive <b>D</b>eclarative <b>O</b>ntelligent <b>A</b>gent <b>S</b>ystem<br/>by <a href="https://github.com/corradosantoro">Prof. Santoro Corrado</a></p>
+    <b>P</b>yt<b>H</b>on <b>I</b>nteractive <b>D</b>eclarative <b>I</b>ntelligent <b>A</b>gent <b>S</b>ystem<br/>by <a href="https://github.com/corradosantoro">Prof. Santoro Corrado</a></p>
 </div>
 
 -------
@@ -46,7 +46,7 @@ We are going to create a __virtual environment__ to contains all the dependencie
 
    - _Linux (Debian-based)_:
      ```bash
-     sudo apt install python3 python3-pip
+     sudo apt install python3 python3-pip python3-venv
      ```
    - _Linux (RHEL-based)_:
      ```bash
@@ -55,7 +55,7 @@ We are going to create a __virtual environment__ to contains all the dependencie
    - _Windows and macOS_:
 
          Use the proper installer provided on the official Python website
-2. Create a virtual environment, open a terminal inside the `RoboticSystems` folder and execute the following command:
+2. Create a virtual environment, open a terminal inside the `phidias` folder and execute the following command:
 
         python -m venv ./venv
 3. Activate the virtual environment:
@@ -68,7 +68,11 @@ We are going to create a __virtual environment__ to contains all the dependencie
      ```batch
      ./venv/Scripts/activate.bat
      ```
-4. Install the library and the related dependencies using:
+4. Install the dependencies using:
+
+       pip install -r requirements.txt
+
+5. Install the library using:
 
        python setup.py install
 

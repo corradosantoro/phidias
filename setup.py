@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name='PHIDIAS',
-      version='1.1.0',
+      version='1.1.1',
       description='PytHon Interactive Declarative Intelligent Agent System',
       author='Corrado Santoro',
       author_email='santoro@dmi.unict.it',
