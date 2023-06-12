@@ -7,7 +7,7 @@ import json
 import sys
 import threading
 import socket
-from Exceptions import InvalidDestinationException
+from phidias.Exceptions import InvalidDestinationException
 
 # Depending on the selected protocol, beliefs will be sent using different functions
 send_belief_impl = None

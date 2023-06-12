@@ -14,8 +14,10 @@ class select_min(Procedure): pass
 class show_min(Procedure): pass
 class selected(SingletonBelief): pass
 
+class visit(Procedure): pass
+
 #
-def_vars('Src', 'Dest', 'Next', 'Cost', 'P', 'Total', 'CurrentMin', 'CurrentMinCost')
+def_vars('Src', 'Dest', 'Next', 'Cost', 'P', 'Total', 'CurrentMin', 'CurrentMinCost', 'Percorso')
 
 path(Src, Dest) >> \
   [
@@ -47,6 +49,23 @@ show_min() / selected(CurrentMin, CurrentMinCost)  >> \
   [
       show_line("Minimum Cost Path ", CurrentMin, ", cost ", CurrentMinCost)
   ]
+  
+
+visit(Src, Dest) >> [ visit(Src, Dest, []) ]
+
+visit(Dest, Dest, Percorso) >> [ 
+	"Percorso.append(Dest) ",
+	show_line(Percorso) ]
+	
+visit(Src, Dest, Percorso)['all'] / link(Src, Next, Cost) >> [
+      	"Percorso = Percorso.copy()",
+	"Percorso.append(Src) ",
+	visit(Next, Dest, Percorso)
+]
+# visit('A','G') / link('A', 'B', 2)
+# visit('A','G') / link('A', 'C', 3)
+# visit('A','G') / link('A', 'D', 1)
+#
 
 PHIDIAS.assert_belief(link('A', 'B', 2))
 PHIDIAS.assert_belief(link('A', 'C', 3))

@@ -7,6 +7,7 @@ import types
 from phidias.Types import *
 from phidias.Knowledge import *
 from phidias.Exceptions import *
+from phidias.Messaging import *
 
 # import copy
 
