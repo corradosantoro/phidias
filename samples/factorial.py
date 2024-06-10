@@ -18,6 +18,7 @@ fact(N) >> [ fact(N, 1) ]
 
 fact(0, Acc) >> [ show_line("the resulting factorial is = ", Acc) ]
 fact(1, Acc) >> [ show_line("the resulting factorial is = ", Acc) ]
+fact(N, Acc) / lt(N, 0) >> [ show_line("Invalid argument = ", N) ]
 fact(N, Acc) >> \
     [
         "Acc = N * Acc",

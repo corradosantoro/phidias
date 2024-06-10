@@ -99,8 +99,8 @@ class worker(Agent):
 class main(Agent):
     def main(self):
 
-        go() >> [show_line("Starting task detection...\n"), TaskDetect().start]
-        work() >> [show_line("Worker on duty..."), +DUTY("YES"), Timer(10).start]
+        go() >> [show_line("Starting task detection...\n"), TaskDetect().start()]
+        work() >> [show_line("Worker on duty..."), +DUTY("YES"), Timer(10).start()]
         +TASK(X) / DUTY(Y) >> [+TASK(X)[{'to':'worker'}]]
         +TIMEOUT("ON") >> [show_line("\nWorker is tired...\n"), -DUTY("YES")]
 

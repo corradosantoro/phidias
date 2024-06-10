@@ -29,7 +29,7 @@ class solver(Agent):
     def main(self):
         +solve()[{'from': X}] >> [ show_line("Request to solve from agent ", X), sieve() ]
         sieve() / (number(X) & number(Y) & neq(X, Y) & (lambda: (X % Y) == 0) ) >> [ -number(X), sieve() ]
-        sieve() >> [ show_line("done"), show_all() ]
+        sieve() >> [ show_line("done") , show_all() ]
 
         show_all() / number(X) >> [ show_all(X) ]
         show_all()  >> [ show_line() ]
@@ -53,3 +53,5 @@ solver().start()
 main().start()
 # run the engine shell
 PHIDIAS.shell(globals())
+
+
