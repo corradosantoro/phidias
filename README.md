@@ -74,7 +74,7 @@ We are going to create a __virtual environment__ to contains all the dependencie
 
 5. Install the library using:
 
-       python setup.py install
+       pip install dist/phidias-1.3.5-py3-none-any.whl
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
