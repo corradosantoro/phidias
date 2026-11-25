@@ -1,0 +1,23 @@
+
+[build-system]
+requires = ["setuptools >= 77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "phidias"
+version = "1.3.5"
+authors = [
+  { name="Corrado Santoro", email="corrado.santoro@unict.it" },
+]
+description = "PytHon Interactive Declarative Intelligent Agent System"
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+license = "MIT"
+license-files = ["LICEN[CS]E*"]
+dependencies = [ ]
+[project.optional-dependencies]
+docs = [ ]
